@@ -22,27 +22,27 @@ class AppRouter {
     routes: [
       GoRoute(
         path: splash,
-        pageBuilder: (_, __) => const NoTransitionPage(child: SplashScreen()),
+        pageBuilder: (_, _) => const NoTransitionPage(child: SplashScreen()),
       ),
       GoRoute(
         path: phone,
-        pageBuilder: (_, __) => const NoTransitionPage(child: PhoneScreen()),
+        pageBuilder: (_, _) => const NoTransitionPage(child: PhoneScreen()),
       ),
       GoRoute(
         path: login,
-        builder: (_, __) => const LoginScreen(),
+        builder: (_, _) => const LoginScreen(),
       ),
       GoRoute(
         path: signUp,
-        builder: (_, __) => const SignUpScreen(),
+        builder: (_, _) => const SignUpScreen(),
       ),
       GoRoute(
         path: personalization,
-        builder: (_, __) => const PersonalizationScreen(),
+        builder: (_, _) => const PersonalizationScreen(),
       ),
       GoRoute(
         path: home,
-        builder: (_, __) => const HomeScreen(),
+        builder: (_, _) => const HomeScreen(),
       ),
     ],
   );

@@ -3,7 +3,6 @@ import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 import '../providers/auth_provider.dart';
 import '../services/api_service.dart';
-import '../theme/app_theme.dart';
 import '../app_router.dart';
 
 class PersonalizationScreen extends StatefulWidget {
@@ -97,7 +96,7 @@ class _PersonalizationScreenState extends State<PersonalizationScreen> {
                     ),
                     const SizedBox(height: 16),
                     DropdownButtonFormField<String>(
-                      value: _sexo,
+                      initialValue: _sexo,
                       decoration: const InputDecoration(labelText: 'Sexo'),
                       items: _sexoOptions.map((String value) {
                         return DropdownMenuItem<String>(
@@ -120,7 +119,7 @@ class _PersonalizationScreenState extends State<PersonalizationScreen> {
                     ),
                     const SizedBox(height: 16),
                     DropdownButtonFormField<String>(
-                      value: _idioma,
+                      initialValue: _idioma,
                       decoration: const InputDecoration(labelText: 'Idioma Principal'),
                       items: _idiomaOptions.map((String value) {
                         return DropdownMenuItem<String>(
