@@ -21,3 +21,18 @@ class AuthResponse(BaseModel):
     access_token: str
     token_type: str = "bearer"
     account: AccountInfo
+
+
+class SignUpRequest(BaseModel):
+    email: str
+    password: str
+
+
+class LoginRequest(BaseModel):
+    email: str
+    password: str
+
+
+class MessageResponse(BaseModel):
+    message: str
+    id: str

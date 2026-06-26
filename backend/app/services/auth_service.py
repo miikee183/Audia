@@ -6,6 +6,7 @@ from datetime import datetime, timedelta, timezone
 from google.oauth2 import id_token as google_id_token
 from google.auth.transport import requests as google_requests
 from jose import jwt
+from passlib.context import CryptContext
 from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
 from app.models.cuenta import Cuenta
@@ -14,6 +15,16 @@ GOOGLE_CLIENT_ID = os.environ.get("GOOGLE_CLIENT_ID", "")
 JWT_SECRET = os.environ.get("JWT_SECRET", "audia-super-secret-key-change-in-production")
 JWT_ALGORITHM = "HS256"
 JWT_EXPIRY_HOURS = 72
+
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+
+
+def hash_password(password: str) -> str:
+    return pwd_context.hash(password)
+
+
+def verify_password(plain: str, hashed: str) -> bool:
+    return pwd_context.verify(plain, hashed)
 
 
 def verify_google_token(token: str) -> dict:

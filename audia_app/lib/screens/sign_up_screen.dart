@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import '../services/api_service.dart';
 import '../theme/app_theme.dart';
 import '../widgets/app_header.dart';
 
@@ -11,7 +12,43 @@ class SignUpScreen extends StatefulWidget {
 }
 
 class _SignUpScreenState extends State<SignUpScreen> {
+  final _emailController = TextEditingController();
+  final _passwordController = TextEditingController();
+  final _formKey = GlobalKey<FormState>();
+  final _api = ApiService();
   bool _obscurePassword = true;
+  bool _isLoading = false;
+
+  @override
+  void dispose() {
+    _emailController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _signUp() async {
+    if (!_formKey.currentState!.validate()) return;
+
+    setState(() => _isLoading = true);
+    try {
+      await _api.post('/auth/signup', {
+        'email': _emailController.text.trim(),
+        'password': _passwordController.text,
+      });
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Cuenta creada con éxito')),
+      );
+      context.pop();
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(e.toString().replaceFirst('Exception: ', ''))),
+      );
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -20,99 +57,71 @@ class _SignUpScreenState extends State<SignUpScreen> {
         child: Center(
           child: SingleChildScrollView(
             padding: const EdgeInsets.symmetric(horizontal: 40),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const AppHeader(logoSize: 100, fontSize: 36, spacing: 20),
-                const SizedBox(height: 40),
-                const _EmailField(),
-                const SizedBox(height: 16),
-                _PasswordField(
-                  obscure: _obscurePassword,
-                  onToggle: () => setState(() => _obscurePassword = !_obscurePassword),
-                ),
-                const SizedBox(height: 24),
-                const _SignUpButton(),
-                const SizedBox(height: 24),
-                const _LoginLink(),
-              ],
+            child: Form(
+              key: _formKey,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const AppHeader(logoSize: 100, fontSize: 36, spacing: 20),
+                  const SizedBox(height: 40),
+                  TextFormField(
+                    controller: _emailController,
+                    keyboardType: TextInputType.emailAddress,
+                    validator: (v) {
+                      if (v == null || v.isEmpty) return 'Ingresa tu correo';
+                      if (!RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$').hasMatch(v)) return 'Correo inválido';
+                      return null;
+                    },
+                    decoration: const InputDecoration(
+                      labelText: 'Correo electrónico',
+                      prefixIcon: Icon(Icons.email_outlined, color: AppTheme.primaryColor),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  TextFormField(
+                    controller: _passwordController,
+                    obscureText: _obscurePassword,
+                    validator: (v) {
+                      if (v == null || v.isEmpty) return 'Ingresa tu contraseña';
+                      if (v.length < 6) return 'Mínimo 6 caracteres';
+                      return null;
+                    },
+                    decoration: InputDecoration(
+                      labelText: 'Contraseña',
+                      prefixIcon: const Icon(Icons.lock_outline, color: AppTheme.primaryColor),
+                      suffixIcon: IconButton(
+                        icon: Icon(
+                          _obscurePassword ? Icons.visibility_off_outlined : Icons.visibility_outlined,
+                          color: Colors.white54,
+                        ),
+                        onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                  ElevatedButton(
+                    onPressed: _isLoading ? null : _signUp,
+                    child: _isLoading
+                        ? const SizedBox(width: 24, height: 24, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.black))
+                        : const Text('Crear cuenta'),
+                  ),
+                  const SizedBox(height: 24),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text('¿Ya tienes cuenta? ', style: TextStyle(color: Colors.white.withAlpha(180))),
+                      TextButton(
+                        onPressed: () => context.pop(),
+                        child: const Text('Inicia sesión'),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
             ),
           ),
         ),
       ),
-    );
-  }
-}
-
-class _EmailField extends StatelessWidget {
-  const _EmailField();
-
-  @override
-  Widget build(BuildContext context) {
-    return TextFormField(
-      keyboardType: TextInputType.emailAddress,
-      decoration: const InputDecoration(
-        labelText: 'Correo electrónico',
-        prefixIcon: Icon(Icons.email_outlined, color: AppTheme.primaryColor),
-      ),
-    );
-  }
-}
-
-class _PasswordField extends StatelessWidget {
-  final bool obscure;
-  final VoidCallback onToggle;
-
-  const _PasswordField({required this.obscure, required this.onToggle});
-
-  @override
-  Widget build(BuildContext context) {
-    return TextFormField(
-      obscureText: obscure,
-      decoration: InputDecoration(
-        labelText: 'Contraseña',
-        prefixIcon: const Icon(Icons.lock_outline, color: AppTheme.primaryColor),
-        suffixIcon: IconButton(
-          icon: Icon(
-            obscure ? Icons.visibility_off_outlined : Icons.visibility_outlined,
-            color: Colors.white54,
-          ),
-          onPressed: onToggle,
-        ),
-      ),
-    );
-  }
-}
-
-class _SignUpButton extends StatelessWidget {
-  const _SignUpButton();
-
-  @override
-  Widget build(BuildContext context) {
-    return ElevatedButton(
-      onPressed: () {},
-      child: const Text('Crear cuenta'),
-    );
-  }
-}
-
-class _LoginLink extends StatelessWidget {
-  const _LoginLink();
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Text(
-          '¿Ya tienes cuenta? ',
-          style: TextStyle(color: Colors.white.withAlpha(180)),
-        ),
-        TextButton(
-          onPressed: () => context.pop(),
-          child: const Text('Inicia sesión'),
-        ),
-      ],
     );
   }
 }

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
+import '../services/api_service.dart';
 import '../theme/app_theme.dart';
 import '../app_router.dart';
 import '../widgets/app_header.dart';
@@ -18,7 +19,9 @@ class _LoginScreenState extends State<LoginScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
+  final _api = ApiService();
   bool _obscurePassword = true;
+  bool _isLoading = false;
 
   @override
   void dispose() {
@@ -27,8 +30,30 @@ class _LoginScreenState extends State<LoginScreen> {
     super.dispose();
   }
 
-  void _login() {
+  Future<void> _login() async {
     if (!_formKey.currentState!.validate()) return;
+
+    setState(() => _isLoading = true);
+    try {
+      final data = await _api.post('/auth/login', {
+        'email': _emailController.text.trim(),
+        'password': _passwordController.text,
+      });
+      if (!mounted) return;
+      final personalizado = data['account']['personalizado'] as bool? ?? false;
+      if (personalizado) {
+        context.go(AppRouter.home);
+      } else {
+        context.go(AppRouter.personalization);
+      }
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(e.toString().replaceFirst('Exception: ', ''))),
+      );
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
   }
 
   Future<void> _signInWithGoogle() async {
@@ -86,7 +111,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                   _ForgotPasswordButton(),
                   const SizedBox(height: 20),
-                  _LoginButton(onPressed: _login),
+                  _LoginButton(onPressed: _login, isLoading: _isLoading),
                   const SizedBox(height: 24),
                   _RegisterLink(),
                 ],
@@ -241,14 +266,17 @@ class _ForgotPasswordButton extends StatelessWidget {
 
 class _LoginButton extends StatelessWidget {
   final VoidCallback onPressed;
+  final bool isLoading;
 
-  const _LoginButton({required this.onPressed});
+  const _LoginButton({required this.onPressed, required this.isLoading});
 
   @override
   Widget build(BuildContext context) {
     return ElevatedButton(
-      onPressed: onPressed,
-      child: const Text('Iniciar sesión'),
+      onPressed: isLoading ? null : onPressed,
+      child: isLoading
+          ? const SizedBox(width: 24, height: 24, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.black))
+          : const Text('Iniciar sesión'),
     );
   }
 }
