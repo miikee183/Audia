@@ -1,11 +1,12 @@
 services:
   - type: web
     name: audia-api
-    runtime: docker
-    repo: https://github.com/tu-usuario/audia
+    runtime: python
+    repo: https://github.com/miikee183/Audia
     branch: main
     plan: free
-    dockerfilePath: backend/Dockerfile
+    buildCommand: pip install -r backend/requirements.txt
+    startCommand: uvicorn app.main:app --app-dir backend --host 0.0.0.0 --port $PORT
     envVars:
       - key: DATABASE_URL
         fromDatabase:
