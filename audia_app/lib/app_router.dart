@@ -4,7 +4,7 @@ import 'screens/phone_screen.dart';
 import 'screens/login_screen.dart';
 import 'screens/sign_up_screen.dart';
 import 'screens/personalization_screen.dart';
-
+import 'screens/code_verification_screen.dart';
 import 'screens/home_screen.dart';
 
 class AppRouter {
@@ -15,6 +15,7 @@ class AppRouter {
   static const login = '/login';
   static const signUp = '/sign-up';
   static const personalization = '/personalization';
+  static const codeVerification = '/verify-code';
   static const home = '/home';
 
   static final GoRouter router = GoRouter(
@@ -27,6 +28,12 @@ class AppRouter {
       GoRoute(
         path: phone,
         pageBuilder: (_, _) => const NoTransitionPage(child: PhoneScreen()),
+      ),
+      GoRoute(
+        path: codeVerification,
+        builder: (_, state) => CodeVerificationScreen(
+          telefono: state.uri.queryParameters['telefono'] ?? '',
+        ),
       ),
       GoRoute(
         path: login,

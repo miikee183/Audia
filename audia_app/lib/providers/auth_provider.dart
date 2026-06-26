@@ -23,6 +23,24 @@ class AuthProvider extends ChangeNotifier {
     );
   }
 
+  void setAuthData({
+    required String accessToken,
+    required String userId,
+    String? email,
+    String? telefono,
+    required bool personalizado,
+  }) {
+    _user = AuthResult(
+      accessToken: accessToken,
+      email: email,
+      telefono: telefono,
+      userId: userId,
+      personalizado: personalizado,
+    );
+    _status = AuthStatus.authenticated;
+    notifyListeners();
+  }
+
   Future<void> signInWithGoogle() async {
     _status = AuthStatus.authenticating;
     notifyListeners();

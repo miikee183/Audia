@@ -4,12 +4,14 @@ import 'api_service.dart';
 class AuthResult {
   final String accessToken;
   final String? email;
+  final String? telefono;
   final String userId;
   final bool personalizado;
 
   AuthResult({
     required this.accessToken,
     this.email,
+    this.telefono,
     required this.userId,
     required this.personalizado,
   });
@@ -38,6 +40,7 @@ class AuthService {
     return AuthResult(
       accessToken: data['access_token'] as String,
       email: data['account']['correoGoogle'] as String?,
+      telefono: data['account']['telefono'] as String?,
       userId: data['account']['id'] as String,
       personalizado: data['account']['personalizado'] as bool? ?? false,
     );

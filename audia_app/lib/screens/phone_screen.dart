@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import '../services/api_service.dart';
 import '../theme/app_theme.dart';
 import '../models/country_code.dart';
 import '../app_router.dart';
@@ -15,7 +16,9 @@ class PhoneScreen extends StatefulWidget {
 class _PhoneScreenState extends State<PhoneScreen> {
   final _phoneController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
+  final _api = ApiService();
   CountryCode _selectedCountry = detectCountry();
+  bool _isLoading = false;
 
   @override
   void dispose() {
@@ -23,10 +26,24 @@ class _PhoneScreenState extends State<PhoneScreen> {
     super.dispose();
   }
 
-  void _verify() {
+  Future<void> _verify() async {
     if (!_formKey.currentState!.validate()) return;
-    if (!mounted) return;
-    context.go(AppRouter.login);
+
+    final fullPhone = '${_selectedCountry.code}${_phoneController.text.trim()}';
+
+    setState(() => _isLoading = true);
+    try {
+      await _api.post('/auth/send-code', {'telefono': fullPhone});
+      if (!mounted) return;
+      context.go('${AppRouter.codeVerification}?telefono=$fullPhone');
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(e.toString().replaceFirst('Exception: ', ''))),
+      );
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
   }
 
   @override
@@ -49,7 +66,7 @@ class _PhoneScreenState extends State<PhoneScreen> {
                     onCountryChanged: (c) => setState(() => _selectedCountry = c),
                   ),
                   const SizedBox(height: 32),
-                  _VerifyButton(onPressed: _verify),
+                  _VerifyButton(onPressed: _verify, isLoading: _isLoading),
                 ],
               ),
             ),
@@ -143,14 +160,17 @@ class _PhoneField extends StatelessWidget {
 
 class _VerifyButton extends StatelessWidget {
   final VoidCallback onPressed;
+  final bool isLoading;
 
-  const _VerifyButton({required this.onPressed});
+  const _VerifyButton({required this.onPressed, required this.isLoading});
 
   @override
   Widget build(BuildContext context) {
     return ElevatedButton(
-      onPressed: onPressed,
-      child: const Text('Verificarse'),
+      onPressed: isLoading ? null : onPressed,
+      child: isLoading
+          ? const SizedBox(width: 24, height: 24, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.black))
+          : const Text('Verifícate'),
     );
   }
 }

@@ -40,6 +40,14 @@ class _LoginScreenState extends State<LoginScreen> {
         'password': _passwordController.text,
       });
       if (!mounted) return;
+      final authProvider = context.read<AuthProvider>();
+      authProvider.setAuthData(
+        accessToken: data['access_token'] as String,
+        userId: data['account']['id'] as String,
+        email: _emailController.text.trim(),
+        telefono: data['account']['telefono'] as String?,
+        personalizado: data['account']['personalizado'] as bool? ?? false,
+      );
       final personalizado = data['account']['personalizado'] as bool? ?? false;
       if (personalizado) {
         context.go(AppRouter.home);
@@ -65,10 +73,7 @@ class _LoginScreenState extends State<LoginScreen> {
       final user = authProvider.user;
       if (user != null) {
         if (user.personalizado) {
-          // Si ya está personalizado, ir a la interfaz principal (por ahora asumiremos '/home' o similar, ajustaremos esto luego, dejemos '/' por defecto de home en muchas apps, o crear un home_screen)
-          // La app no parece tener home configurado aún en router, así que lo mandaré a una pantalla que crearemos o lo mandaré a phone temporalmente
-          // El usuario no especificó la ruta main, asumamos que necesitamos crearla o redirigir
-          context.go('/home'); 
+          context.go(AppRouter.home);
         } else {
           context.go(AppRouter.personalization);
         }

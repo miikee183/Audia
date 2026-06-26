@@ -7,8 +7,10 @@ from google.oauth2 import id_token as google_id_token
 from google.auth.transport import requests as google_requests
 from jose import jwt
 from passlib.context import CryptContext
-from fastapi import HTTPException, status
+from fastapi import Depends, HTTPException, Header, status
+from jose import JWTError, jwt
 from sqlalchemy.orm import Session
+from app.database.database import get_db
 from app.models.cuenta import Cuenta
 
 GOOGLE_CLIENT_ID = os.environ.get("GOOGLE_CLIENT_ID", "")
@@ -17,6 +19,23 @@ JWT_ALGORITHM = "HS256"
 JWT_EXPIRY_HOURS = 72
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+
+
+def get_current_account(
+    authorization: str = Header(...),
+    db: Session = Depends(get_db),
+) -> str:
+    if not authorization.startswith("Bearer "):
+        raise HTTPException(status_code=401, detail="Invalid authorization header")
+    token = authorization[7:]
+    try:
+        payload = jwt.decode(token, JWT_SECRET, algorithms=[JWT_ALGORITHM])
+        account_id = payload.get("sub")
+        if not account_id:
+            raise HTTPException(status_code=401, detail="Invalid token payload")
+        return account_id
+    except JWTError:
+        raise HTTPException(status_code=401, detail="Invalid or expired token")
 
 
 def hash_password(password: str) -> str:
@@ -49,26 +68,4 @@ def create_access_token(account_id: str) -> str:
     return jwt.encode(payload, JWT_SECRET, algorithm=JWT_ALGORITHM)
 
 
-def authenticate_google(token: str, db: Session) -> dict:
-    info = verify_google_token(token)
-    email = info.get("email")
-    if not email:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Email not provided by Google")
 
-    cuenta = db.query(Cuenta).filter(Cuenta.correoGoogle == email).first()
-
-    if not cuenta:
-        cuenta = Cuenta(
-            correoGoogle=email,
-            personalizado=False,
-        )
-        db.add(cuenta)
-        db.commit()
-        db.refresh(cuenta)
-
-    access_token = create_access_token(cuenta.id)
-    return {
-        "access_token": access_token,
-        "token_type": "bearer",
-        "account": cuenta,
-    }

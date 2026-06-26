@@ -8,9 +8,9 @@ class GoogleAuthRequest(BaseModel):
 
 class AccountInfo(BaseModel):
     id: str
+    telefono: str | None = None
     correoGoogle: str | None = None
     correoAudia: str | None = None
-    telefono: str | None = None
     personalizado: bool
 
     class Config:
@@ -31,6 +31,32 @@ class SignUpRequest(BaseModel):
 class LoginRequest(BaseModel):
     email: str
     password: str
+
+
+class PhoneAuthRequest(BaseModel):
+    telefono: str
+
+
+class LinkGoogleRequest(BaseModel):
+    id_token: str
+
+
+class LinkEmailRequest(BaseModel):
+    email: str
+    password: str
+
+
+class SendCodeRequest(BaseModel):
+    telefono: str
+
+
+class SendCodeResponse(BaseModel):
+    message: str
+
+
+class VerifyCodeRequest(BaseModel):
+    telefono: str
+    codigo: str
 
 
 class MessageResponse(BaseModel):

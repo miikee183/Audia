@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 import '../services/api_service.dart';
+import '../providers/auth_provider.dart';
+import '../app_router.dart';
 import '../theme/app_theme.dart';
 import '../widgets/app_header.dart';
 
@@ -31,15 +34,19 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
     setState(() => _isLoading = true);
     try {
-      await _api.post('/auth/signup', {
+      final data = await _api.post('/auth/signup', {
         'email': _emailController.text.trim(),
         'password': _passwordController.text,
       });
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Cuenta creada con éxito')),
+      final authProvider = context.read<AuthProvider>();
+      authProvider.setAuthData(
+        accessToken: data['access_token'] as String,
+        userId: data['account']['id'] as String,
+        email: _emailController.text.trim(),
+        personalizado: data['account']['personalizado'] as bool? ?? false,
       );
-      context.pop();
+      context.go(AppRouter.personalization);
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
