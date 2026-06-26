@@ -41,12 +41,12 @@ class AuthProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> signInWithGoogle() async {
+  Future<void> signInWithGoogle({String? telefono}) async {
     _status = AuthStatus.authenticating;
     notifyListeners();
 
     try {
-      _user = await _authService.signInWithGoogle();
+      _user = await _authService.signInWithGoogle(telefono: telefono);
       _status = AuthStatus.authenticated;
     } catch (e) {
       _status = AuthStatus.unauthenticated;

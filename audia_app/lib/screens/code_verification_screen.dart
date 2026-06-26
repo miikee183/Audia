@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:provider/provider.dart';
 import '../services/api_service.dart';
-import '../providers/auth_provider.dart';
 import '../theme/app_theme.dart';
 import '../app_router.dart';
 import '../widgets/app_header.dart';
@@ -33,24 +31,15 @@ class _CodeVerificationScreenState extends State<CodeVerificationScreen> {
 
     setState(() => _isLoading = true);
     try {
-      final data = await _api.post('/auth/verify-code', {
+      await _api.post('/auth/verify-code', {
         'telefono': widget.telefono,
         'codigo': _codeController.text.trim(),
       });
       if (!mounted) return;
-      final authProvider = context.read<AuthProvider>();
-      authProvider.setAuthData(
-        accessToken: data['access_token'] as String,
-        userId: data['account']['id'] as String,
-        telefono: data['account']['telefono'] as String?,
-        personalizado: data['account']['personalizado'] as bool? ?? false,
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Cuenta verificada. Inicia sesión.')),
       );
-      final personalizado = data['account']['personalizado'] as bool? ?? false;
-      if (personalizado) {
-        context.go(AppRouter.home);
-      } else {
-        context.go(AppRouter.personalization);
-      }
+      context.go('${AppRouter.login}?telefono=${Uri.encodeQueryComponent(widget.telefono)}');
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(

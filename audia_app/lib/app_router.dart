@@ -37,11 +37,15 @@ class AppRouter {
       ),
       GoRoute(
         path: login,
-        builder: (_, _) => const LoginScreen(),
+        builder: (_, state) => LoginScreen(
+          telefono: state.uri.queryParameters['telefono'],
+        ),
       ),
       GoRoute(
         path: signUp,
-        builder: (_, _) => const SignUpScreen(),
+        builder: (_, state) => SignUpScreen(
+          telefono: state.uri.queryParameters['telefono'],
+        ),
       ),
       GoRoute(
         path: personalization,

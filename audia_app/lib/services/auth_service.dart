@@ -27,7 +27,7 @@ class AuthService {
           serverClientId: serverClientId,
         );
 
-  Future<AuthResult> signInWithGoogle() async {
+  Future<AuthResult> signInWithGoogle({String? telefono}) async {
     final account = await _googleSignIn.signIn();
     if (account == null) throw Exception('Inicio de sesión cancelado');
 
@@ -35,7 +35,9 @@ class AuthService {
     final idToken = auth.idToken;
     if (idToken == null) throw Exception('No se pudo obtener el token de Google');
 
-    final data = await _api.post('/auth/google', {'id_token': idToken});
+    final body = <String, dynamic>{'id_token': idToken};
+    if (telefono != null) body['telefono'] = telefono;
+    final data = await _api.post('/auth/google', body);
 
     return AuthResult(
       accessToken: data['access_token'] as String,

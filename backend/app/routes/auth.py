@@ -104,13 +104,23 @@ def google_auth(request: GoogleAuthRequest, db: Session = Depends(get_db)):
         raise HTTPException(status_code=400, detail="Email not provided by Google")
 
     cuenta = db.query(Cuenta).filter(Cuenta.correoGoogle == email).first()
-    if not cuenta:
-        # Intentar vincular con cuenta existente por ID (si el usuario ya está autenticado)
-        # Si no, crear cuenta nueva solo con Google
-        cuenta = Cuenta(correoGoogle=email, personalizado=False)
-        db.add(cuenta)
-        db.commit()
-        db.refresh(cuenta)
+    if cuenta:
+        return _cuenta_to_response(cuenta)
+
+    # Si se proporciona telefono, vincular con la cuenta de teléfono existente
+    if request.telefono:
+        cuenta = db.query(Cuenta).filter(Cuenta.telefono == request.telefono).first()
+        if cuenta:
+            cuenta.correoGoogle = email
+            db.commit()
+            db.refresh(cuenta)
+            return _cuenta_to_response(cuenta)
+
+    # Crear cuenta nueva solo con Google
+    cuenta = Cuenta(correoGoogle=email, personalizado=False)
+    db.add(cuenta)
+    db.commit()
+    db.refresh(cuenta)
 
     return _cuenta_to_response(cuenta)
 
@@ -120,6 +130,16 @@ def signup(request: SignUpRequest, db: Session = Depends(get_db)):
     existing = db.query(Cuenta).filter(Cuenta.correoAudia == request.email).first()
     if existing:
         raise HTTPException(status_code=400, detail="El correo ya está registrado")
+
+    # Si se proporciona telefono, vincular con la cuenta de teléfono existente
+    if request.telefono:
+        cuenta = db.query(Cuenta).filter(Cuenta.telefono == request.telefono).first()
+        if cuenta:
+            cuenta.correoAudia = request.email
+            cuenta.contrasenaAudia = hash_password(request.password)
+            db.commit()
+            db.refresh(cuenta)
+            return _cuenta_to_response(cuenta)
 
     cuenta = Cuenta(
         correoAudia=request.email,

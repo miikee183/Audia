@@ -9,7 +9,9 @@ import '../widgets/app_header.dart';
 import '../providers/auth_provider.dart';
 
 class LoginScreen extends StatefulWidget {
-  const LoginScreen({super.key});
+  final String? telefono;
+
+  const LoginScreen({super.key, this.telefono});
 
   @override
   State<LoginScreen> createState() => _LoginScreenState();
@@ -67,7 +69,7 @@ class _LoginScreenState extends State<LoginScreen> {
   Future<void> _signInWithGoogle() async {
     try {
       final authProvider = context.read<AuthProvider>();
-      await authProvider.signInWithGoogle();
+      await authProvider.signInWithGoogle(telefono: widget.telefono);
       if (!mounted) return;
       
       final user = authProvider.user;
@@ -118,7 +120,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   const SizedBox(height: 20),
                   _LoginButton(onPressed: _login, isLoading: _isLoading),
                   const SizedBox(height: 24),
-                  _RegisterLink(),
+                  _RegisterLink(telefono: widget.telefono),
                 ],
               ),
             ),
@@ -287,6 +289,10 @@ class _LoginButton extends StatelessWidget {
 }
 
 class _RegisterLink extends StatelessWidget {
+  final String? telefono;
+
+  const _RegisterLink({this.telefono});
+
   @override
   Widget build(BuildContext context) {
     return Row(
@@ -297,7 +303,13 @@ class _RegisterLink extends StatelessWidget {
           style: TextStyle(color: Colors.white.withAlpha(180)),
         ),
         TextButton(
-          onPressed: () => context.push(AppRouter.signUp),
+          onPressed: () {
+            if (telefono != null) {
+              context.push('${AppRouter.signUp}?telefono=${Uri.encodeQueryComponent(telefono!)}');
+            } else {
+              context.push(AppRouter.signUp);
+            }
+          },
           child: const Text('Regístrate'),
         ),
       ],

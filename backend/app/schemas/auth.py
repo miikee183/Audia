@@ -4,6 +4,7 @@ from datetime import datetime
 
 class GoogleAuthRequest(BaseModel):
     id_token: str
+    telefono: str | None = None
 
 
 class AccountInfo(BaseModel):
@@ -26,6 +27,7 @@ class AuthResponse(BaseModel):
 class SignUpRequest(BaseModel):
     email: str
     password: str
+    telefono: str | None = None
 
 
 class LoginRequest(BaseModel):

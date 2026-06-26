@@ -8,7 +8,9 @@ import '../theme/app_theme.dart';
 import '../widgets/app_header.dart';
 
 class SignUpScreen extends StatefulWidget {
-  const SignUpScreen({super.key});
+  final String? telefono;
+
+  const SignUpScreen({super.key, this.telefono});
 
   @override
   State<SignUpScreen> createState() => _SignUpScreenState();
@@ -34,10 +36,12 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
     setState(() => _isLoading = true);
     try {
-      final data = await _api.post('/auth/signup', {
+      final body = <String, dynamic>{
         'email': _emailController.text.trim(),
         'password': _passwordController.text,
-      });
+      };
+      if (widget.telefono != null) body['telefono'] = widget.telefono;
+      final data = await _api.post('/auth/signup', body);
       if (!mounted) return;
       final authProvider = context.read<AuthProvider>();
       authProvider.setAuthData(
