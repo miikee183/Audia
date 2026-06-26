@@ -31,7 +31,7 @@ def send_code(request: SendCodeRequest, db: Session = Depends(get_db)):
         raise HTTPException(status_code=400, detail="Teléfono requerido")
 
     codigo = generate_code()
-    expires_at = datetime.now(timezone.utc) + timedelta(minutes=5)
+    expires_at = datetime.now(timezone.utc).replace(tzinfo=None) + timedelta(minutes=5)
 
     codigo_v = CodigoVerificacion(
         telefono=telefono,
@@ -53,6 +53,7 @@ def send_code(request: SendCodeRequest, db: Session = Depends(get_db)):
 def verify_code(request: VerifyCodeRequest, db: Session = Depends(get_db)):
     telefono = request.telefono.strip()
     codigo = request.codigo.strip()
+    import logging; logging.getLogger("audia").info(f"verify_code: telefono='{telefono}' codigo='{codigo}'")
 
     codigo_v = (
         db.query(CodigoVerificacion)
@@ -60,7 +61,7 @@ def verify_code(request: VerifyCodeRequest, db: Session = Depends(get_db)):
             CodigoVerificacion.telefono == telefono,
             CodigoVerificacion.codigo == codigo,
             CodigoVerificacion.usado == False,
-            CodigoVerificacion.expires_at > datetime.now(timezone.utc),
+            CodigoVerificacion.expires_at > datetime.now(timezone.utc).replace(tzinfo=None),
         )
         .order_by(CodigoVerificacion.created_at.desc())
         .first()

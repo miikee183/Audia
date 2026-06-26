@@ -54,7 +54,8 @@ class _PhoneScreenState extends State<PhoneScreen> {
       }
 
       if (!mounted) return;
-      context.go('${AppRouter.codeVerification}?telefono=$fullPhone');
+      final encodedPhone = Uri.encodeQueryComponent(fullPhone);
+      context.go('${AppRouter.codeVerification}?telefono=$encodedPhone');
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
