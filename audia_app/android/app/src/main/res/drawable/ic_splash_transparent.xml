@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Drawable completamente transparente usado como ícono del splash nativo.
+     De esta forma el splash del sistema se ve como fondo negro puro,
+     indistinguible de la animación Flutter que sigue a continuación. -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+    <solid android:color="@android:color/transparent" />
+</shape>

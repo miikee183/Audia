@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Tema base para Android < 12: fondo negro, sin ícono nativo -->
+    <style name="LaunchTheme" parent="@android:style/Theme.Black.NoTitleBar">
+        <item name="android:windowBackground">@drawable/launch_background</item>
+    </style>
+    <!-- Tema aplicado una vez Flutter está corriendo -->
+    <style name="NormalTheme" parent="@android:style/Theme.Black.NoTitleBar">
+        <item name="android:windowBackground">@drawable/launch_background</item>
+    </style>
+    <!--
+        Android 12+ SIEMPRE muestra una splash screen nativa.
+        La hacemos invisible: fondo negro + ícono transparente.
+        El resultado es un flash negro puro, indistinguible de la
+        animación Flutter que arranaca inmediatamente después.
+    -->
+    <style name="Theme.Audia.Splash" parent="Theme.SplashScreen">
+        <item name="windowSplashScreenBackground">@android:color/black</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/ic_splash_transparent</item>
+        <item name="windowSplashScreenIconBackgroundColor">@android:color/black</item>
+        <item name="postSplashScreenTheme">@style/NormalTheme</item>
+    </style>
+</resources>
