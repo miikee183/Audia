@@ -4,7 +4,7 @@ import '../services/auth_service.dart';
 enum AuthStatus { unauthenticated, authenticating, authenticated }
 
 class AuthProvider extends ChangeNotifier {
-  final AuthService _authService = AuthService();
+  late final AuthService _authService;
 
   AuthStatus _status = AuthStatus.unauthenticated;
   AuthResult? _user;
@@ -12,6 +12,16 @@ class AuthProvider extends ChangeNotifier {
   AuthStatus get status => _status;
   AuthResult? get user => _user;
   bool get isAuthenticated => _status == AuthStatus.authenticated;
+
+  AuthProvider({
+    String? iosClientId,
+    String? serverClientId,
+  }) {
+    _authService = AuthService(
+      iosClientId: iosClientId,
+      serverClientId: serverClientId,
+    );
+  }
 
   Future<void> signInWithGoogle() async {
     _status = AuthStatus.authenticating;

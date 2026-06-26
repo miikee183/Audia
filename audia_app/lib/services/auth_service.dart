@@ -16,8 +16,14 @@ class AuthResult {
 }
 
 class AuthService {
-  final GoogleSignIn _googleSignIn = GoogleSignIn();
+  final GoogleSignIn _googleSignIn;
   final ApiService _api = ApiService();
+
+  AuthService({String? iosClientId, String? serverClientId})
+      : _googleSignIn = GoogleSignIn(
+          clientId: iosClientId,
+          serverClientId: serverClientId,
+        );
 
   Future<AuthResult> signInWithGoogle() async {
     final account = await _googleSignIn.signIn();

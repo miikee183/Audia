@@ -1,0 +1,23 @@
+services:
+  - type: web
+    name: audia-api
+    runtime: docker
+    repo: https://github.com/tu-usuario/audia
+    branch: main
+    plan: free
+    dockerfilePath: backend/Dockerfile
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: audia-db
+          property: connectionString
+      - key: GOOGLE_CLIENT_ID
+        sync: false
+      - key: JWT_SECRET
+        generateValue: true
+
+databases:
+  - name: audia-db
+    plan: free
+    region: virginia
+    postgresMajorVersion: 16

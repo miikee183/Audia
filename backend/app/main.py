@@ -20,6 +20,10 @@ app.include_router(auth_router)
 app.include_router(personalizacion_router)
 
 
+@app.get("/")
+def root():
+    return {"app": "Audia API", "version": "0.1.0"}
+
 @app.get("/health")
 def health():
     return {"status": "ok"}
