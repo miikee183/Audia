@@ -26,12 +26,16 @@ def _send_via_twilio(to: str, codigo: str) -> bool:
         return False
 
 
+def is_configured() -> bool:
+    return bool(TWILIO_ACCOUNT_SID and TWILIO_AUTH_TOKEN and TWILIO_FROM_NUMBER)
+
+
 def send_sms(to: str, codigo: str) -> bool:
-    if TWILIO_ACCOUNT_SID and TWILIO_AUTH_TOKEN and TWILIO_FROM_NUMBER:
+    if is_configured():
         return _send_via_twilio(to, codigo)
 
     logger.info(f"=== SMS SIMULADO: Código para {to} => {codigo} ===")
-    return True
+    return False
 
 
 def generate_code() -> str:

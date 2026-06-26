@@ -8,7 +8,7 @@ from app.schemas.auth import (
     SendCodeRequest, SendCodeResponse, VerifyCodeRequest,
 )
 from app.services.auth_service import hash_password, verify_password, create_access_token, verify_google_token, get_current_account
-from app.services.sms_service import send_sms, generate_code
+from app.services.sms_service import send_sms, generate_code, is_configured
 from app.models.codigo_verificacion import CodigoVerificacion
 from datetime import datetime, timedelta, timezone
 
@@ -43,7 +43,10 @@ def send_code(request: SendCodeRequest, db: Session = Depends(get_db)):
 
     send_sms(telefono, codigo)
 
-    return SendCodeResponse(message="Código enviado")
+    return SendCodeResponse(
+        message="Código enviado",
+        dev_codigo=codigo if not is_configured() else None,
+    )
 
 
 @router.post("/verify-code", response_model=AuthResponse)

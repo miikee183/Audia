@@ -33,7 +33,26 @@ class _PhoneScreenState extends State<PhoneScreen> {
 
     setState(() => _isLoading = true);
     try {
-      await _api.post('/auth/send-code', {'telefono': fullPhone});
+      final data = await _api.post('/auth/send-code', {'telefono': fullPhone});
+      if (!mounted) return;
+
+      final devCodigo = data['dev_codigo'] as String?;
+      if (devCodigo != null) {
+        await showDialog(
+          context: context,
+          builder: (ctx) => AlertDialog(
+            title: const Text('Código de verificación'),
+            content: Text('Tu código es: $devCodigo'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(ctx).pop(),
+                child: const Text('OK'),
+              ),
+            ],
+          ),
+        );
+      }
+
       if (!mounted) return;
       context.go('${AppRouter.codeVerification}?telefono=$fullPhone');
     } catch (e) {

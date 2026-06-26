@@ -52,6 +52,7 @@ class SendCodeRequest(BaseModel):
 
 class SendCodeResponse(BaseModel):
     message: str
+    dev_codigo: str | None = None
 
 
 class VerifyCodeRequest(BaseModel):
