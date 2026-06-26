@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 from app.database.database import get_db
-from app.schemas.auth import GoogleAuthRequest, AuthResponse, UserInfo
+from app.schemas.auth import GoogleAuthRequest, AuthResponse, AccountInfo
 from app.services.auth_service import authenticate_google
 
 router = APIRouter(prefix="/auth", tags=["auth"])
@@ -13,5 +13,5 @@ def google_auth(request: GoogleAuthRequest, db: Session = Depends(get_db)):
     return AuthResponse(
         access_token=result["access_token"],
         token_type=result["token_type"],
-        user=UserInfo.model_validate(result["user"]),
+        account=AccountInfo.model_validate(result["account"]),
     )

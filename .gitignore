@@ -1,2 +1,8 @@
 # Obsidian - app de notas, no forma parte del proyecto Flutter
 .obsidian/
+
+# Backend
+backend/.env
+backend/.venv
+backend/__pycache__/
+

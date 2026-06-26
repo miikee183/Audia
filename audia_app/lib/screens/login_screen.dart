@@ -33,9 +33,21 @@ class _LoginScreenState extends State<LoginScreen> {
 
   Future<void> _signInWithGoogle() async {
     try {
-      await context.read<AuthProvider>().signInWithGoogle();
+      final authProvider = context.read<AuthProvider>();
+      await authProvider.signInWithGoogle();
       if (!mounted) return;
-      context.go(AppRouter.personalization);
+      
+      final user = authProvider.user;
+      if (user != null) {
+        if (user.personalizado) {
+          // Si ya está personalizado, ir a la interfaz principal (por ahora asumiremos '/home' o similar, ajustaremos esto luego, dejemos '/' por defecto de home en muchas apps, o crear un home_screen)
+          // La app no parece tener home configurado aún en router, así que lo mandaré a una pantalla que crearemos o lo mandaré a phone temporalmente
+          // El usuario no especificó la ruta main, asumamos que necesitamos crearla o redirigir
+          context.go('/home'); 
+        } else {
+          context.go(AppRouter.personalization);
+        }
+      }
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(

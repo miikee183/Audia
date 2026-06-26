@@ -5,6 +5,8 @@ import 'screens/login_screen.dart';
 import 'screens/sign_up_screen.dart';
 import 'screens/personalization_screen.dart';
 
+import 'screens/home_screen.dart';
+
 class AppRouter {
   AppRouter._();
 
@@ -13,6 +15,7 @@ class AppRouter {
   static const login = '/login';
   static const signUp = '/sign-up';
   static const personalization = '/personalization';
+  static const home = '/home';
 
   static final GoRouter router = GoRouter(
     initialLocation: splash,
@@ -36,6 +39,10 @@ class AppRouter {
       GoRoute(
         path: personalization,
         builder: (_, __) => const PersonalizationScreen(),
+      ),
+      GoRoute(
+        path: home,
+        builder: (_, __) => const HomeScreen(),
       ),
     ],
   );

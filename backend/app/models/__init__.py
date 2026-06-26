@@ -1,4 +1,4 @@
-from app.models.usuario import Usuario
-from app.models.personalizacion import Personalizacion
+from .cuenta import Cuenta
+from .personalizacion import Personalizacion
 
-__all__ = ["Usuario", "Personalizacion"]
+__all__ = ["Cuenta", "Personalizacion"]

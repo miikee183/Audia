@@ -1,12 +1,14 @@
 import os
+from dotenv import load_dotenv
+
+load_dotenv()
 from datetime import datetime, timedelta, timezone
 from google.oauth2 import id_token as google_id_token
 from google.auth.transport import requests as google_requests
 from jose import jwt
-from jose.exceptions import JWTError
 from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
-from app.models.usuario import Usuario
+from app.models.cuenta import Cuenta
 
 GOOGLE_CLIENT_ID = os.environ.get("GOOGLE_CLIENT_ID", "")
 JWT_SECRET = os.environ.get("JWT_SECRET", "audia-super-secret-key-change-in-production")
@@ -26,10 +28,10 @@ def verify_google_token(token: str) -> dict:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=str(e))
 
 
-def create_access_token(user_id: str) -> str:
+def create_access_token(account_id: str) -> str:
     now = datetime.now(timezone.utc)
     payload = {
-        "sub": user_id,
+        "sub": account_id,
         "iat": now,
         "exp": now + timedelta(hours=JWT_EXPIRY_HOURS),
     }
@@ -42,22 +44,20 @@ def authenticate_google(token: str, db: Session) -> dict:
     if not email:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Email not provided by Google")
 
-    user = db.query(Usuario).filter(Usuario.correo == email).first()
+    cuenta = db.query(Cuenta).filter(Cuenta.correoGoogle == email).first()
 
-    if not user:
-        user = Usuario(
-            correo=email,
-            usuario=info.get("name"),
-            telefono="",
-            auth_provider="google",
+    if not cuenta:
+        cuenta = Cuenta(
+            correoGoogle=email,
+            personalizado=False,
         )
-        db.add(user)
+        db.add(cuenta)
         db.commit()
-        db.refresh(user)
+        db.refresh(cuenta)
 
-    access_token = create_access_token(user.id)
+    access_token = create_access_token(cuenta.id)
     return {
         "access_token": access_token,
         "token_type": "bearer",
-        "user": user,
+        "account": cuenta,
     }
