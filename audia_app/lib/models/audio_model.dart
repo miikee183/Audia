@@ -1,4 +1,4 @@
-﻿class AudioModel {
+class AudioModel {
   final String id;
   final String userId;
   final String nombreUsuario;

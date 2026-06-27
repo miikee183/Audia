@@ -1,4 +1,4 @@
-﻿import 'dart:convert';
+import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -38,23 +38,23 @@ class _PersonalizationScreenState extends State<PersonalizationScreen> {
 
   static const Map<String, String> _idiomas = {
     'English': 'English',
-    'EspaÃ±ol': 'EspaÃ±ol',
-    'FranÃ§ais': 'FranÃ§ais',
-    'PortuguÃªs': 'PortuguÃªs',
+    'Español': 'Español',
+    'Français': 'Français',
+    'Português': 'Português',
     'Deutsch': 'Deutsch',
     'Italiano': 'Italiano',
-    'Ð ÑƒÑÑÐºÐ¸Ð¹': 'Ð ÑƒÑÑÐºÐ¸Ð¹',
-    'Ø§Ù„Ø¹Ø±Ø¨ÙŠØ©': 'Ø§Ù„Ø¹Ø±Ø¨ÙŠØ©',
-    'ä¸­æ–‡': 'ä¸­æ–‡',
-    'í•œêµ­ì–´': 'í•œêµ­ì–´',
-    'æ—¥æœ¬èªž': 'æ—¥æœ¬èªž',
+    'Русский': 'Русский',
+    'العربية': 'العربية',
+    '中文': '中文',
+    '한국어': '한국어',
+    '日本語': '日本語',
   };
 
   final List<String> _stepTitles = [
     'Fecha de nacimiento',
     'Sexo',
     'Nombre de Usuario',
-    'BiografÃ­a',
+    'Biografía',
     'Foto de perfil',
     'Idioma',
   ];
@@ -148,10 +148,10 @@ class _PersonalizationScreenState extends State<PersonalizationScreen> {
 
   String _stepQuestion(int step) {
     const questions = [
-      'Â¿CuÃ¡ndo naciste?',
-      'Â¿CuÃ¡l es tu sexo?',
+      '¿Cuándo naciste?',
+      '¿Cuál es tu sexo?',
       'Elige un nombre de usuario',
-      'BiografÃ­a',
+      'Biografía',
       'Foto de perfil',
       'Idioma',
     ];
@@ -338,7 +338,7 @@ class _PersonalizationScreenState extends State<PersonalizationScreen> {
                                 padding: const EdgeInsets.symmetric(vertical: 16),
                                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                               ),
-                              child: const Text('AtrÃ¡s', style: TextStyle(color: Colors.white, fontSize: 16)),
+                              child: const Text('Atrás', style: TextStyle(color: Colors.white, fontSize: 16)),
                             ),
                           ),
                         if (_currentStep > 0) const SizedBox(width: 16),
@@ -578,7 +578,7 @@ class _BioStepState extends State<_BioStep> {
             textAlign: TextAlign.center,
             style: const TextStyle(fontSize: 20, color: Colors.white),
             decoration: InputDecoration(
-              hintText: 'BiografÃ­a...',
+              hintText: 'Biografía...',
               hintStyle: TextStyle(color: Colors.white.withAlpha(80), fontSize: 20),
               border: InputBorder.none,
             ),

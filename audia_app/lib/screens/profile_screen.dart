@@ -70,7 +70,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               padding: const EdgeInsets.all(16),
               child: Column(
                 children: [
-                  // Mes y navegaciÃ³n
+                  // Mes y navegación
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
@@ -90,7 +90,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   ),
                   const SizedBox(height: 12),
 
-                  // DÃ­as de la semana
+                  // Días de la semana
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceAround,
                     children: ['D', 'L', 'M', 'M', 'J', 'V', 'S'].map((d) =>
@@ -102,7 +102,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   ),
                   const SizedBox(height: 8),
 
-                  // Grid de dÃ­as
+                  // Grid de días
                   Wrap(
                     spacing: 4,
                     runSpacing: 4,
@@ -139,8 +139,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
           const SizedBox(height: 24),
 
-          // Ãšltimos audios
-          const Text('Ãšltimos audios', style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
+          // Últimos audios
+          const Text('Últimos audios', style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
           const SizedBox(height: 12),
           ...List.generate(
             3,

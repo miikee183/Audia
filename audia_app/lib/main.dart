@@ -1,17 +1,21 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'theme/app_theme.dart';
 import 'app_router.dart';
 import 'config.dart';
 import 'providers/auth_provider.dart';
+import 'providers/audio_provider.dart';
 
 void main() {
   runApp(
-    ChangeNotifierProvider(
-      create: (_) => AuthProvider(
-        iosClientId: AppConfig.googleIosClientId,
-        serverClientId: AppConfig.googleWebClientId,
-      ),
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => AuthProvider(
+          iosClientId: AppConfig.googleIosClientId,
+          serverClientId: AppConfig.googleWebClientId,
+        )),
+        ChangeNotifierProvider(create: (_) => AudioProvider()),
+      ],
       child: const AudiaApp(),
     ),
   );

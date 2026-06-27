@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import '../theme/app_theme.dart';
 
 class FriendsScreen extends StatelessWidget {
@@ -25,7 +25,7 @@ class FriendsScreen extends StatelessWidget {
                 child: const Icon(Icons.person, color: Colors.white70),
               ),
               title: Text('Amigo ${i + 1}', style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600)),
-              subtitle: const Text('Ãšltimo mensaje...', style: TextStyle(color: Colors.white38, fontSize: 12)),
+              subtitle: const Text('Último mensaje...', style: TextStyle(color: Colors.white38, fontSize: 12)),
               trailing: const Icon(Icons.chevron_right, color: Colors.white38),
               onTap: () {},
             ),

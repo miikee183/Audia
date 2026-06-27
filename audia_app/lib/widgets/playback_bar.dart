@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:audia/theme/app_theme.dart';
 import 'package:audia/providers/audio_provider.dart';

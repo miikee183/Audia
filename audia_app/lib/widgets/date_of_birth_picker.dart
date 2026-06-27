@@ -105,9 +105,9 @@ class _DateOfBirthPickerState extends State<DateOfBirthPicker> {
           padding: const EdgeInsets.symmetric(vertical: 8),
           child: Row(
             children: [
-              Expanded(child: _buildWheel(label: 'DÃ­a', items: days, controller: _dayController, onChanged: _onDayChanged)),
+              Expanded(child: _buildWheel(label: 'Día', items: days, controller: _dayController, onChanged: _onDayChanged)),
               Expanded(child: _buildWheel(label: 'Mes', items: _monthNames, controller: _monthController, onChanged: _onMonthChanged)),
-              Expanded(flex: 2, child: _buildWheel(label: 'AÃ±o', items: years, controller: _yearController, onChanged: _onYearChanged)),
+              Expanded(flex: 2, child: _buildWheel(label: 'Año', items: years, controller: _yearController, onChanged: _onYearChanged)),
             ],
           ),
         ),

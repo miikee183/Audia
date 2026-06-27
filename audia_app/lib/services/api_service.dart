@@ -1,4 +1,4 @@
-﻿import 'dart:convert';
+import 'dart:convert';
 import 'dart:io';
 import 'package:http/http.dart' as http;
 
@@ -6,10 +6,12 @@ class ApiService {
   static const String _prodBaseUrl = 'https://audia-5cjt.onrender.com';
 
   static String get baseUrl {
-    const bool isProduction = bool.fromEnvironment('PRODUCTION', defaultValue: false);
-    if (isProduction) return _prodBaseUrl;
-    if (Platform.isAndroid) return 'http://10.0.2.2:8000';
-    return 'http://localhost:8000';
+    const bool isDev = bool.fromEnvironment('DEV', defaultValue: false);
+    if (isDev) {
+      if (Platform.isAndroid) return 'http://10.0.2.2:8000';
+      return 'http://localhost:8000';
+    }
+    return _prodBaseUrl;
   }
 
   static String? _token;
@@ -24,13 +26,13 @@ class ApiService {
 
   Map<String, String> get _headers => {
     'Content-Type': 'application/json',
-    if (_token != null) 'Authorization': 'Bearer ',
+    if (_token != null) 'Authorization': 'Bearer $_token',
   };
 
   Future<Map<String, dynamic>> post(String path, Map<String, dynamic> body) async {
     final response = await _client
         .post(
-          Uri.parse(''),
+          Uri.parse('$baseUrl$path'),
           headers: _headers,
           body: jsonEncode(body),
         )
@@ -47,7 +49,7 @@ class ApiService {
   Future<dynamic> get(String path) async {
     final response = await _client
         .get(
-          Uri.parse(''),
+          Uri.parse('$baseUrl$path'),
           headers: _headers,
         )
         .timeout(const Duration(seconds: 15));

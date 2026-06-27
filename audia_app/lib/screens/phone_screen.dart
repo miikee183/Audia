@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../services/api_service.dart';
 import '../theme/app_theme.dart';
@@ -41,8 +41,8 @@ class _PhoneScreenState extends State<PhoneScreen> {
         await showDialog(
           context: context,
           builder: (ctx) => AlertDialog(
-            title: const Text('CÃ³digo de verificaciÃ³n'),
-            content: Text('Tu cÃ³digo es: $devCodigo'),
+            title: const Text('Código de verificación'),
+            content: Text('Tu código es: $devCodigo'),
             actions: [
               TextButton(
                 onPressed: () => Navigator.of(ctx).pop(),
@@ -162,12 +162,12 @@ class _PhoneField extends StatelessWidget {
             controller: controller,
             keyboardType: TextInputType.phone,
             validator: (value) {
-              if (value == null || value.isEmpty) return 'Ingresa tu nÃºmero';
-              if (value.length < 7) return 'NÃºmero invÃ¡lido';
+              if (value == null || value.isEmpty) return 'Ingresa tu número';
+              if (value.length < 7) return 'Número inválido';
               return null;
             },
             decoration: const InputDecoration(
-              hintText: 'NÃºmero de telÃ©fono',
+              hintText: 'Número de teléfono',
               hintStyle: TextStyle(color: Colors.white38),
               labelStyle: TextStyle(color: Colors.white70),
             ),
@@ -190,7 +190,7 @@ class _VerifyButton extends StatelessWidget {
       onPressed: isLoading ? null : onPressed,
       child: isLoading
           ? const SizedBox(width: 24, height: 24, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.black))
-          : const Text('VerifÃ­cate'),
+          : const Text('Verifícate'),
     );
   }
 }

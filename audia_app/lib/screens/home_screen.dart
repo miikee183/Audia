@@ -8,7 +8,7 @@ class HomeScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(title: const Text('Audia Home')),
       body: const Center(
-        child: Text('Â¡Bienvenido a Audia! Tu cuenta estÃ¡ configurada.', style: TextStyle(color: Colors.white, fontSize: 18), textAlign: TextAlign.center,),
+        child: Text('¡Bienvenido a Audia! Tu cuenta está configurada.', style: TextStyle(color: Colors.white, fontSize: 18), textAlign: TextAlign.center,),
       ),
     );
   }
