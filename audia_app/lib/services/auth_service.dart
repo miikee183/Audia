@@ -18,13 +18,18 @@ class AuthResult {
 }
 
 class AuthService {
-  final GoogleSignIn _googleSignIn;
+  late final GoogleSignIn _googleSignIn;
   final ApiService _api = ApiService();
+
+  static String get _effectiveWebClientId {
+    const env = String.fromEnvironment('GOOGLE_WEB_CLIENT_ID');
+    return env.isNotEmpty ? env : '';
+  }
 
   AuthService({String? iosClientId, String? serverClientId})
       : _googleSignIn = GoogleSignIn(
           clientId: iosClientId,
-          serverClientId: serverClientId,
+          serverClientId: serverClientId ?? (_effectiveWebClientId.isNotEmpty ? _effectiveWebClientId : null),
         );
 
   Future<AuthResult> signInWithGoogle({String? telefono}) async {
