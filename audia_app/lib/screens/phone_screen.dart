@@ -23,6 +23,7 @@ class _PhoneScreenState extends State<PhoneScreen> {
   @override
   void dispose() {
     _phoneController.dispose();
+    _api.dispose();
     super.dispose();
   }
 

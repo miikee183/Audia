@@ -3,6 +3,12 @@ import 'package:provider/provider.dart';
 import 'package:audia/theme/app_theme.dart';
 import 'package:audia/providers/audio_provider.dart';
 
+String _formatDuration(int totalSeconds) {
+  final m = totalSeconds ~/ 60;
+  final s = totalSeconds % 60;
+  return '${m}:${s.toString().padLeft(2, '0')}';
+}
+
 class PlaybackBar extends StatelessWidget {
   const PlaybackBar({super.key});
 
@@ -45,7 +51,7 @@ class PlaybackBar extends StatelessWidget {
                           overflow: TextOverflow.ellipsis,
                         ),
                         Text(
-                          ' / ',
+                          _formatDuration(pos.inSeconds),
                           style: const TextStyle(color: Colors.white38, fontSize: 11),
                         ),
                       ],

@@ -11,6 +11,7 @@ class AudioProvider extends ChangeNotifier {
   final AudioPlayer _player = AudioPlayer();
 
   final Map<String, List<AudioModel>> _audiosBySource = {};
+  final Map<String, AudioModel> _audioMap = {};
   AudioModel? _currentAudio;
   bool _isLoading = false;
   String? _error;
@@ -21,7 +22,6 @@ class AudioProvider extends ChangeNotifier {
   StreamSubscription? _positionSub;
   StreamSubscription? _playerStateSub;
   StreamSubscription? _durationSub;
-  Timer? _progressTimer;
 
   List<AudioModel> audiosForSource(String source) => _audiosBySource[source] ?? [];
   AudioModel? get currentAudio => _currentAudio;
@@ -32,6 +32,18 @@ class AudioProvider extends ChangeNotifier {
   Duration? get duration => _duration;
   PlaybackSpeed get speed => _speed;
   double get speedValue => _speed == PlaybackSpeed.x1 ? 1.0 : (_speed == PlaybackSpeed.x2 ? 2.0 : 4.0);
+  double get progress => _duration != null && _duration!.inMilliseconds > 0
+      ? (_position.inMilliseconds / _duration!.inMilliseconds).clamp(0.0, 1.0)
+      : 0.0;
+
+  void _syncMap() {
+    _audioMap.clear();
+    for (final list in _audiosBySource.values) {
+      for (final audio in list) {
+        _audioMap[audio.id] = audio;
+      }
+    }
+  }
 
   AudioProvider() {
     _positionSub = _player.positionStream.listen((pos) {
@@ -48,46 +60,17 @@ class AudioProvider extends ChangeNotifier {
       if (wasPlaying != _isPlaying) {
         notifyListeners();
       }
-      if (state.processingState == ProcessingState.completed) {
-        _onAudioComplete();
-      }
     });
   }
 
-  double listenProgress(String audioId) {
-    if (_currentAudio?.id == audioId && _duration != null && _duration!.inMilliseconds > 0) {
-      return (_position.inMilliseconds / _duration!.inMilliseconds).clamp(0.0, 1.0);
-    }
-    for (final list in _audiosBySource.values) {
-      for (final a in list) {
-        if (a.id == audioId) {
-          if (a.isCompleted) return 1.0;
-          if (a.duration > 0) return (a.listenProgress / a.duration).clamp(0.0, 1.0);
-          return 0.0;
-        }
-      }
-    }
-    return 0.0;
-  }
-
-  bool isCompleted(String audioId) {
-    if (_currentAudio?.id == audioId) {
-      return _player.processingState == ProcessingState.completed;
-    }
-    for (final list in _audiosBySource.values) {
-      for (final a in list) {
-        if (a.id == audioId) return a.isCompleted;
-      }
-    }
-    return false;
-  }
-
-  Future<void> loadAudios(String source) async {
+  Future<void> loadAudios() async {
     _isLoading = true;
     _error = null;
     notifyListeners();
     try {
-      _audiosBySource[source] = await _audioService.getAudios(source);
+      final audios = await _audioService.getAudios();
+      _audiosBySource['para_ti'] = audios;
+      _syncMap();
     } catch (e) {
       _error = e.toString();
     } finally {
@@ -97,12 +80,9 @@ class AudioProvider extends ChangeNotifier {
   }
 
   Future<void> play(AudioModel audio) async {
-    _progressTimer?.cancel();
-
     if (_currentAudio?.id == audio.id) {
       if (_player.playing) return;
       await _player.play();
-      _startProgressTimer();
       return;
     }
 
@@ -111,67 +91,17 @@ class AudioProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
-      await _player.setUrl(audio.cloudinaryUrl);
+      await _player.setUrl(audio.audioUrl);
       await _player.setSpeed(speedValue);
-
-      if (audio.listenProgress > 0 && !audio.isCompleted) {
-        await _player.seek(Duration(milliseconds: (audio.listenProgress * 1000).round()));
-      }
-
       await _player.play();
-      _startProgressTimer();
     } catch (e) {
       _error = 'Error al reproducir audio';
       notifyListeners();
     }
   }
 
-  void _startProgressTimer() {
-    _progressTimer?.cancel();
-    _progressTimer = Timer.periodic(const Duration(seconds: 5), (_) => _saveProgress());
-  }
-
-  Future<void> _saveProgress() async {
-    if (_currentAudio == null) return;
-    final seconds = _position.inMilliseconds / 1000.0;
-    final completed = _player.processingState == ProcessingState.completed;
-
-    for (final list in _audiosBySource.values) {
-      for (int i = 0; i < list.length; i++) {
-        if (list[i].id == _currentAudio!.id) {
-          list[i].listenProgress = seconds;
-          list[i].isCompleted = completed;
-        }
-      }
-    }
-
-    try {
-      await _audioService.updateProgress(_currentAudio!.id, seconds, completed);
-    } catch (_) {}
-  }
-
-  Future<void> _onAudioComplete() async {
-    _progressTimer?.cancel();
-    if (_currentAudio != null) {
-      for (final list in _audiosBySource.values) {
-        for (int i = 0; i < list.length; i++) {
-          if (list[i].id == _currentAudio!.id) {
-            list[i].isCompleted = true;
-            list[i].listenProgress = _currentAudio!.duration;
-          }
-        }
-      }
-      try {
-        await _audioService.updateProgress(_currentAudio!.id, _currentAudio!.duration, true);
-      } catch (_) {}
-    }
-    notifyListeners();
-  }
-
   Future<void> pause() async {
     await _player.pause();
-    _progressTimer?.cancel();
-    await _saveProgress();
   }
 
   Future<void> togglePlay() async {
@@ -179,7 +109,6 @@ class AudioProvider extends ChangeNotifier {
       await pause();
     } else {
       await _player.play();
-      _startProgressTimer();
     }
   }
 
@@ -202,8 +131,6 @@ class AudioProvider extends ChangeNotifier {
   }
 
   Future<void> stop() async {
-    _progressTimer?.cancel();
-    await _saveProgress();
     await _player.stop();
     _currentAudio = null;
     _position = Duration.zero;
@@ -213,41 +140,32 @@ class AudioProvider extends ChangeNotifier {
   }
 
   Future<void> toggleLike(String audioId) async {
-    for (final list in _audiosBySource.values) {
-      for (int i = 0; i < list.length; i++) {
-        if (list[i].id == audioId) {
-          try {
-            final result = await _audioService.toggleLike(audioId);
-            list[i].isLiked = result['liked'] as bool;
-            list[i].likeCount = (result['like_count'] as num).toInt();
-            notifyListeners();
-          } catch (_) {}
-          return;
-        }
-      }
-    }
+    final audio = _audioMap[audioId];
+    if (audio == null) return;
+    try {
+      final result = await _audioService.toggleLike(audioId);
+      audio.isLiked = result['liked'] as bool;
+      audio.numLikes = (result['num_likes'] as num).toInt();
+      notifyListeners();
+    } catch (_) {}
   }
 
-  Future<AudioCommentModel> addComment(String audioId, String text) async {
-    final comment = await _audioService.addComment(audioId, text);
-    for (final list in _audiosBySource.values) {
-      for (int i = 0; i < list.length; i++) {
-        if (list[i].id == audioId) {
-          list[i].commentCount++;
-          notifyListeners();
-        }
-      }
+  Future<ComentarioModel> addComment(String audioId, String texto) async {
+    final comment = await _audioService.addComment(audioId, texto);
+    final audio = _audioMap[audioId];
+    if (audio != null) {
+      audio.numComentarios++;
+      notifyListeners();
     }
     return comment;
   }
 
-  Future<List<AudioCommentModel>> getComments(String audioId) async {
+  Future<List<ComentarioModel>> getComments(String audioId) async {
     return await _audioService.getComments(audioId);
   }
 
   @override
   void dispose() {
-    _progressTimer?.cancel();
     _positionSub?.cancel();
     _playerStateSub?.cancel();
     _durationSub?.cancel();
@@ -256,5 +174,3 @@ class AudioProvider extends ChangeNotifier {
     super.dispose();
   }
 }
-
-

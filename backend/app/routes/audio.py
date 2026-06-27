@@ -1,20 +1,17 @@
 import os
-import uuid
 import tempfile
 import cloudinary
 import cloudinary.uploader
-from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form, Query, status
-from sqlalchemy.orm import Session, joinedload
-from sqlalchemy import func
+from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form
+from sqlalchemy.orm import Session
 from app.database.database import get_db
 from app.models.cuenta import Cuenta
-from app.models.personalizacion import Personalizacion
-from app.models.audio import Audio, AudioLike, AudioComment, AudioListen
-from app.schemas.audio import AudioResponse, AudioListResponse, AudioCommentResponse, AudioCommentCreate, AudioProgressRequest
+from app.models.personalizacion import Perfil
+from app.models.audio import Audio, Comentario
+from app.schemas.audio import AudioResponse, AudioListResponse, ComentarioResponse, ComentarioCreate
 from app.services.auth_service import get_current_account
 from mutagen.mp3 import MP3
 from mutagen.wave import WAVE
-from datetime import datetime
 
 router = APIRouter(prefix="/audio", tags=["audio"])
 
@@ -38,44 +35,34 @@ def _get_duration(file_path: str) -> float:
 
 
 def _get_user_info(db: Session, user_id: str) -> tuple[str, str | None]:
-    pers = db.query(Personalizacion).filter(Personalizacion.cuenta_id == user_id).first()
-    if pers:
-        return pers.nombre_usuario, pers.foto_perfil
+    cuenta = db.query(Cuenta).filter(Cuenta.id == user_id).first()
+    if cuenta and cuenta.perfil:
+        return cuenta.perfil.nombre_usuario, cuenta.perfil.foto_perfil
     return "Usuario", None
 
 
 def _audio_to_response(audio: Audio, current_user_id: str, db: Session) -> AudioResponse:
-    username, foto = _get_user_info(db, audio.user_id)
-    like_count = db.query(func.count(AudioLike.id)).filter(AudioLike.audio_id == audio.id).scalar() or 0
-    comment_count = db.query(func.count(AudioComment.id)).filter(AudioComment.audio_id == audio.id).scalar() or 0
-    is_liked = db.query(AudioLike).filter(
-        AudioLike.user_id == current_user_id, AudioLike.audio_id == audio.id
-    ).first() is not None
-    listen = db.query(AudioListen).filter(
-        AudioListen.user_id == current_user_id, AudioListen.audio_id == audio.id
-    ).first()
-    listen_progress = listen.progress_seconds if listen else 0.0
-    is_completed = listen.completed if listen else False
+    username, foto = _get_user_info(db, audio.id_cuenta_dueno)
+    is_liked = current_user_id in (audio.lista_likes_cuentas or [])
     return AudioResponse(
         id=audio.id,
-        user_id=audio.user_id,
+        id_cuenta_dueno=audio.id_cuenta_dueno,
         nombre_usuario=username,
         foto_perfil=foto,
-        cloudinary_url=audio.cloudinary_url,
-        duration=audio.duration,
-        like_count=like_count,
-        comment_count=comment_count,
+        audio_url=audio.audio_url,
+        duracion=audio.duracion,
+        num_likes=audio.num_likes,
+        num_comentarios=audio.num_comentarios,
+        foto_fondo=audio.foto_fondo,
         is_liked=is_liked,
-        listen_progress=listen_progress,
-        is_completed=is_completed,
-        created_at=audio.created_at,
     )
 
 
 @router.post("/upload", response_model=AudioResponse)
 async def upload_audio(
     file: UploadFile = File(...),
-    duration: float = Form(...),
+    duracion: float = Form(...),
+    foto_fondo: str | None = Form(None),
     db: Session = Depends(get_db),
     account_id: str = Depends(get_current_account),
 ):
@@ -92,7 +79,7 @@ async def upload_audio(
     try:
         actual_duration = _get_duration(tmp_path)
         if actual_duration > 0:
-            duration = actual_duration
+            duracion = actual_duration
 
         result = cloudinary.uploader.upload(
             tmp_path,
@@ -101,18 +88,17 @@ async def upload_audio(
             use_filename=True,
             unique_filename=True,
         )
-        cloudinary_url = result["secure_url"]
-        public_id = result["public_id"]
+        audio_url = result["secure_url"]
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error subiendo a Cloudinary: {str(e)}")
     finally:
         os.unlink(tmp_path)
 
     audio = Audio(
-        user_id=account_id,
-        cloudinary_url=cloudinary_url,
-        cloudinary_public_id=public_id,
-        duration=duration,
+        id_cuenta_dueno=account_id,
+        audio_url=audio_url,
+        duracion=duracion,
+        foto_fondo=foto_fondo,
     )
     db.add(audio)
     db.commit()
@@ -123,22 +109,22 @@ async def upload_audio(
 
 @router.get("/", response_model=AudioListResponse)
 def list_audios(
-    source: str = Query("para_ti", pattern="^(para_ti|contactos|siguiendo)$"),
     db: Session = Depends(get_db),
     account_id: str = Depends(get_current_account),
 ):
-    query = (
-        db.query(Audio)
-        .options(joinedload(Audio.user))
-        .order_by(Audio.created_at.desc())
+    audios = db.query(Audio).order_by(Audio.id.desc()).all()
+
+    return AudioListResponse(
+        audios=[_audio_to_response(a, account_id, db) for a in audios]
     )
 
-    if source == "contactos":
-        query = query.filter(Audio.user_id == account_id)
-    elif source == "siguiendo":
-        query = query.filter(Audio.user_id == account_id)
-    audios = query.all()
 
+@router.get("/mis-audios", response_model=AudioListResponse)
+def mis_audios(
+    db: Session = Depends(get_db),
+    account_id: str = Depends(get_current_account),
+):
+    audios = db.query(Audio).filter(Audio.id_cuenta_dueno == account_id).order_by(Audio.id.desc()).all()
     return AudioListResponse(
         audios=[_audio_to_response(a, account_id, db) for a in audios]
     )
@@ -154,25 +140,25 @@ def toggle_like(
     if not audio:
         raise HTTPException(status_code=404, detail="Audio no encontrado")
 
-    existing = db.query(AudioLike).filter(
-        AudioLike.user_id == account_id, AudioLike.audio_id == audio_id
-    ).first()
+    if not audio.lista_likes_cuentas:
+        audio.lista_likes_cuentas = []
 
-    if existing:
-        db.delete(existing)
+    if account_id in audio.lista_likes_cuentas:
+        audio.lista_likes_cuentas.remove(account_id)
+        audio.num_likes = max(0, audio.num_likes - 1)
         db.commit()
-        return {"liked": False, "like_count": db.query(func.count(AudioLike.id)).filter(AudioLike.audio_id == audio_id).scalar()}
+        return {"liked": False, "num_likes": audio.num_likes}
     else:
-        like = AudioLike(user_id=account_id, audio_id=audio_id)
-        db.add(like)
+        audio.lista_likes_cuentas.append(account_id)
+        audio.num_likes += 1
         db.commit()
-        return {"liked": True, "like_count": db.query(func.count(AudioLike.id)).filter(AudioLike.audio_id == audio_id).scalar()}
+        return {"liked": True, "num_likes": audio.num_likes}
 
 
-@router.post("/{audio_id}/comment", response_model=AudioCommentResponse)
-def add_comment(
+@router.post("/{audio_id}/comentario", response_model=ComentarioResponse)
+def add_comentario(
     audio_id: str,
-    request: AudioCommentCreate,
+    request: ComentarioCreate,
     db: Session = Depends(get_db),
     account_id: str = Depends(get_current_account),
 ):
@@ -180,29 +166,33 @@ def add_comment(
     if not audio:
         raise HTTPException(status_code=404, detail="Audio no encontrado")
 
-    if not request.text.strip():
+    if not request.texto.strip():
         raise HTTPException(status_code=400, detail="El comentario no puede estar vacío")
 
-    comment = AudioComment(user_id=account_id, audio_id=audio_id, text=request.text.strip())
-    db.add(comment)
+    comentario = Comentario(
+        id_dueno_comentario=account_id,
+        id_audio=audio_id,
+        texto=request.texto.strip(),
+    )
+    db.add(comentario)
+    audio.num_comentarios += 1
     db.commit()
-    db.refresh(comment)
+    db.refresh(comentario)
 
     username, foto = _get_user_info(db, account_id)
-    return AudioCommentResponse(
-        id=comment.id,
-        user_id=account_id,
+    return ComentarioResponse(
+        id=comentario.id,
+        id_dueno_comentario=account_id,
         nombre_usuario=username,
         foto_perfil=foto,
-        text=comment.text,
-        like_count=0,
+        texto=comentario.texto,
+        num_likes=comentario.num_likes,
         is_liked=False,
-        created_at=comment.created_at,
     )
 
 
-@router.get("/{audio_id}/comments")
-def list_comments(
+@router.get("/{audio_id}/comentarios")
+def list_comentarios(
     audio_id: str,
     db: Session = Depends(get_db),
     account_id: str = Depends(get_current_account),
@@ -211,32 +201,32 @@ def list_comments(
     if not audio:
         raise HTTPException(status_code=404, detail="Audio no encontrado")
 
-    comments = (
-        db.query(AudioComment)
-        .filter(AudioComment.audio_id == audio_id)
-        .order_by(AudioComment.created_at.desc())
+    comentarios = (
+        db.query(Comentario)
+        .filter(Comentario.id_audio == audio_id)
+        .order_by(Comentario.id.desc())
         .all()
     )
     result = []
-    for c in comments:
-        username, foto = _get_user_info(db, c.user_id)
-        result.append(AudioCommentResponse(
+    for c in comentarios:
+        username, foto = _get_user_info(db, c.id_dueno_comentario)
+        is_liked = account_id in (c.lista_likes_cuentas or [])
+        result.append(ComentarioResponse(
             id=c.id,
-            user_id=c.user_id,
+            id_dueno_comentario=c.id_dueno_comentario,
             nombre_usuario=username,
             foto_perfil=foto,
-            text=c.text,
-            like_count=0,
-            is_liked=False,
-            created_at=c.created_at,
+            texto=c.texto,
+            num_likes=c.num_likes,
+            is_liked=is_liked,
         ))
     return result
 
 
-@router.post("/{audio_id}/progress")
-def update_progress(
+@router.post("/{audio_id}/comentario/{comentario_id}/like")
+def toggle_comentario_like(
     audio_id: str,
-    request: AudioProgressRequest,
+    comentario_id: str,
     db: Session = Depends(get_db),
     account_id: str = Depends(get_current_account),
 ):
@@ -244,22 +234,22 @@ def update_progress(
     if not audio:
         raise HTTPException(status_code=404, detail="Audio no encontrado")
 
-    listen = db.query(AudioListen).filter(
-        AudioListen.user_id == account_id, AudioListen.audio_id == audio_id
+    comentario = db.query(Comentario).filter(
+        Comentario.id == comentario_id, Comentario.id_audio == audio_id
     ).first()
+    if not comentario:
+        raise HTTPException(status_code=404, detail="Comentario no encontrado")
 
-    if listen:
-        listen.progress_seconds = request.progress_seconds
-        listen.completed = request.completed
-        listen.updated_at = datetime.now()
+    if not comentario.lista_likes_cuentas:
+        comentario.lista_likes_cuentas = []
+
+    if account_id in comentario.lista_likes_cuentas:
+        comentario.lista_likes_cuentas.remove(account_id)
+        comentario.num_likes = max(0, comentario.num_likes - 1)
+        db.commit()
+        return {"liked": False, "num_likes": comentario.num_likes}
     else:
-        listen = AudioListen(
-            user_id=account_id,
-            audio_id=audio_id,
-            progress_seconds=request.progress_seconds,
-            completed=request.completed,
-        )
-        db.add(listen)
-
-    db.commit()
-    return {"message": "Progreso actualizado"}
+        comentario.lista_likes_cuentas.append(account_id)
+        comentario.num_likes += 1
+        db.commit()
+        return {"liked": True, "num_likes": comentario.num_likes}

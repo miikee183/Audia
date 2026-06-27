@@ -17,10 +17,24 @@ router = APIRouter(prefix="/auth", tags=["auth"])
 
 def _cuenta_to_response(cuenta: Cuenta) -> AuthResponse:
     access_token = create_access_token(cuenta.id)
+    account_data = {
+        "id": cuenta.id,
+        "telefono": cuenta.telefono,
+        "correoGoogle": cuenta.correoGoogle,
+        "correoAudia": cuenta.correoAudia,
+        "tiene_perfil": cuenta.perfil is not None,
+    }
+    if cuenta.perfil:
+        account_data["nombre_usuario"] = cuenta.perfil.nombre_usuario
+        account_data["biografia"] = cuenta.perfil.biografia
+        account_data["foto_perfil"] = cuenta.perfil.foto_perfil
+        account_data["num_seguidores"] = cuenta.perfil.num_seguidores
+        account_data["num_siguiendo"] = cuenta.perfil.num_siguiendo
+        account_data["likes_totales"] = cuenta.perfil.likes_totales
     return AuthResponse(
         access_token=access_token,
         token_type="bearer",
-        account=AccountInfo.model_validate(cuenta),
+        account=AccountInfo(**account_data),
     )
 
 
@@ -53,7 +67,6 @@ def send_code(request: SendCodeRequest, db: Session = Depends(get_db)):
 def verify_code(request: VerifyCodeRequest, db: Session = Depends(get_db)):
     telefono = request.telefono.strip()
     codigo = request.codigo.strip()
-    import logging; logging.getLogger("audia").info(f"verify_code: telefono='{telefono}' codigo='{codigo}'")
 
     codigo_v = (
         db.query(CodigoVerificacion)
@@ -75,7 +88,7 @@ def verify_code(request: VerifyCodeRequest, db: Session = Depends(get_db)):
 
     cuenta = db.query(Cuenta).filter(Cuenta.telefono == telefono).first()
     if not cuenta:
-        cuenta = Cuenta(telefono=telefono, personalizado=False)
+        cuenta = Cuenta(telefono=telefono)
         db.add(cuenta)
 
     db.commit()
@@ -89,7 +102,7 @@ def phone_auth(request: PhoneAuthRequest, db: Session = Depends(get_db)):
     telefono = request.telefono.strip()
     cuenta = db.query(Cuenta).filter(Cuenta.telefono == telefono).first()
     if not cuenta:
-        cuenta = Cuenta(telefono=telefono, personalizado=False)
+        cuenta = Cuenta(telefono=telefono)
         db.add(cuenta)
         db.commit()
         db.refresh(cuenta)
@@ -103,20 +116,16 @@ def google_auth(request: GoogleAuthRequest, db: Session = Depends(get_db)):
     if not email:
         raise HTTPException(status_code=400, detail="Email not provided by Google")
 
-    # Verificar si el correo ya está usado (Google o Audia)
     existente = (
         db.query(Cuenta)
         .filter((Cuenta.correoGoogle == email) | (Cuenta.correoAudia == email))
         .first()
     )
     if existente:
-        # Si es exactamente el mismo Google, login normal
         if existente.correoGoogle == email:
             return _cuenta_to_response(existente)
-        # Si el correo está registrado como Audia, bloquear
         raise HTTPException(status_code=400, detail="El correo ya está registrado con otra cuenta")
 
-    # Si se proporciona telefono, vincular con la cuenta de teléfono existente
     if request.telefono:
         cuenta = db.query(Cuenta).filter(Cuenta.telefono == request.telefono).first()
         if cuenta:
@@ -125,8 +134,7 @@ def google_auth(request: GoogleAuthRequest, db: Session = Depends(get_db)):
             db.refresh(cuenta)
             return _cuenta_to_response(cuenta)
 
-    # Crear cuenta nueva solo con Google
-    cuenta = Cuenta(correoGoogle=email, personalizado=False)
+    cuenta = Cuenta(correoGoogle=email)
     db.add(cuenta)
     db.commit()
     db.refresh(cuenta)
@@ -144,7 +152,6 @@ def signup(request: SignUpRequest, db: Session = Depends(get_db)):
     if existing:
         raise HTTPException(status_code=400, detail="El correo ya está registrado")
 
-    # Si se proporciona telefono, vincular con la cuenta de teléfono existente
     if request.telefono:
         cuenta = db.query(Cuenta).filter(Cuenta.telefono == request.telefono).first()
         if cuenta:
@@ -157,7 +164,6 @@ def signup(request: SignUpRequest, db: Session = Depends(get_db)):
     cuenta = Cuenta(
         correoAudia=request.email,
         contrasenaAudia=hash_password(request.password),
-        personalizado=False,
     )
     db.add(cuenta)
     db.commit()
@@ -182,7 +188,6 @@ def link_google(
     db: Session = Depends(get_db),
     account_id: str = Depends(get_current_account),
 ):
-    """Vincula un inicio de sesión de Google a la cuenta autenticada."""
     info = verify_google_token(request.id_token)
     email = info.get("email")
     if not email:
@@ -212,7 +217,6 @@ def link_email(
     db: Session = Depends(get_db),
     account_id: str = Depends(get_current_account),
 ):
-    """Vincula email/contraseña a la cuenta autenticada."""
     taken = (
         db.query(Cuenta)
         .filter((Cuenta.correoAudia == request.email) | (Cuenta.correoGoogle == request.email))
@@ -229,4 +233,15 @@ def link_email(
     cuenta.contrasenaAudia = hash_password(request.password)
     db.commit()
     db.refresh(cuenta)
+    return _cuenta_to_response(cuenta)
+
+
+@router.get("/me", response_model=AuthResponse)
+def get_current_user(
+    db: Session = Depends(get_db),
+    account_id: str = Depends(get_current_account),
+):
+    cuenta = db.query(Cuenta).filter(Cuenta.id == account_id).first()
+    if not cuenta:
+        raise HTTPException(status_code=404, detail="Cuenta no encontrada")
     return _cuenta_to_response(cuenta)

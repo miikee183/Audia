@@ -1,36 +1,89 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
+from pydantic import BaseModel
 from app.database.database import get_db
 from app.models.cuenta import Cuenta
-from app.models.personalizacion import Personalizacion
-from app.schemas.personalizacion import PersonalizacionRequest
+from app.models.personalizacion import Perfil
+from app.schemas.personalizacion import PerfilRequest
+from app.services.auth_service import get_current_account
+from typing import Optional
 
-router = APIRouter(prefix="/personalizacion", tags=["personalizacion"])
+
+class PerfilBasico(BaseModel):
+    cuenta_id: str
+    nombre_usuario: str
+    foto_perfil: Optional[str] = None
+
+    class Config:
+        from_attributes = True
+
+
+router = APIRouter(prefix="/perfil", tags=["perfil"])
+
 
 @router.post("/")
-def create_personalizacion(request: PersonalizacionRequest, db: Session = Depends(get_db)):
+def crear_perfil(request: PerfilRequest, db: Session = Depends(get_db)):
     cuenta = db.query(Cuenta).filter(Cuenta.id == request.cuenta_id).first()
     if not cuenta:
         raise HTTPException(status_code=404, detail="Cuenta no encontrada")
-    
-    if cuenta.personalizado:
-        raise HTTPException(status_code=400, detail="Esta cuenta ya fue personalizada")
 
-    pers = Personalizacion(
-        cuenta_id=request.cuenta_id,
-        ano_nacimiento=request.ano_nacimiento,
+    if cuenta.perfil:
+        raise HTTPException(status_code=400, detail="Esta cuenta ya tiene un perfil")
+
+    perfil = Perfil(
+        fecha_nacimiento=request.fecha_nacimiento,
         sexo=request.sexo,
         nombre_usuario=request.nombre_usuario,
-        gustos=request.gustos,
         foto_perfil=request.foto_perfil,
+        biografia=request.biografia,
         idioma=request.idioma,
     )
-    db.add(pers)
-    
-    # Marcar cuenta como personalizada
-    cuenta.personalizado = True
-    
+    db.add(perfil)
+    db.flush()
+
+    cuenta.id_perfil = perfil.id
+
     db.commit()
-    db.refresh(pers)
-    
-    return {"message": "Personalización guardada con éxito", "id": pers.id}
+    db.refresh(perfil)
+
+    return {"message": "Perfil creado con éxito", "id": perfil.id}
+
+
+class BatchCuentasRequest(BaseModel):
+    cuenta_ids: list[str]
+
+
+class PerfilDetalle(BaseModel):
+    lista_seguidores: list[str]
+    lista_siguiendo: list[str]
+
+
+@router.get("/detalle", response_model=PerfilDetalle)
+def obtener_detalle_perfil(
+    db: Session = Depends(get_db),
+    account_id: str = Depends(get_current_account),
+):
+    cuenta = db.query(Cuenta).filter(Cuenta.id == account_id).first()
+    if not cuenta or not cuenta.perfil:
+        raise HTTPException(status_code=404, detail="Perfil no encontrado")
+    return PerfilDetalle(
+        lista_seguidores=cuenta.perfil.lista_seguidores or [],
+        lista_siguiendo=cuenta.perfil.lista_siguiendo or [],
+    )
+
+
+@router.post("/por-cuentas", response_model=list[PerfilBasico])
+def obtener_perfiles_por_cuentas(
+    request: BatchCuentasRequest,
+    db: Session = Depends(get_db),
+):
+    cuentas = db.query(Cuenta).filter(Cuenta.id.in_(request.cuenta_ids)).all()
+    result = []
+    for c in cuentas:
+        if c.perfil:
+            result.append(PerfilBasico(
+                cuenta_id=c.id,
+                nombre_usuario=c.perfil.nombre_usuario,
+                foto_perfil=c.perfil.foto_perfil,
+            ))
+    return result

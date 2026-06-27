@@ -1,11 +1,13 @@
 from pydantic import BaseModel
 from typing import Optional
+from datetime import date
 
-class PersonalizacionRequest(BaseModel):
+
+class PerfilRequest(BaseModel):
     cuenta_id: str
-    ano_nacimiento: int
+    fecha_nacimiento: date
     sexo: str
     nombre_usuario: str
-    gustos: Optional[str] = None
     foto_perfil: Optional[str] = None
+    biografia: Optional[str] = None
     idioma: str

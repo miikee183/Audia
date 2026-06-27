@@ -6,14 +6,14 @@ class AuthResult {
   final String? email;
   final String? telefono;
   final String userId;
-  final bool personalizado;
+  final bool tienePerfil;
 
   AuthResult({
     required this.accessToken,
     this.email,
     this.telefono,
     required this.userId,
-    required this.personalizado,
+    required this.tienePerfil,
   });
 }
 
@@ -44,7 +44,7 @@ class AuthService {
       email: data['account']['correoGoogle'] as String?,
       telefono: data['account']['telefono'] as String?,
       userId: data['account']['id'] as String,
-      personalizado: data['account']['personalizado'] as bool? ?? false,
+      tienePerfil: data['account']['tiene_perfil'] as bool? ?? false,
     );
   }
 
@@ -52,4 +52,3 @@ class AuthService {
     await _googleSignIn.signOut();
   }
 }
-

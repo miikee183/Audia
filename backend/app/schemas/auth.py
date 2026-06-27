@@ -1,5 +1,4 @@
 from pydantic import BaseModel
-from datetime import datetime
 
 
 class GoogleAuthRequest(BaseModel):
@@ -12,7 +11,13 @@ class AccountInfo(BaseModel):
     telefono: str | None = None
     correoGoogle: str | None = None
     correoAudia: str | None = None
-    personalizado: bool
+    tiene_perfil: bool = False
+    nombre_usuario: str | None = None
+    biografia: str | None = None
+    foto_perfil: str | None = None
+    num_seguidores: int = 0
+    num_siguiendo: int = 0
+    likes_totales: int = 0
 
     class Config:
         from_attributes = True

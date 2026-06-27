@@ -6,19 +6,20 @@ import 'package:audia/models/audio_model.dart';
 class AudioService {
   final ApiService _api = ApiService();
 
-  Future<List<AudioModel>> getAudios(String source) async {
-    final response = await _api.get('/audio/?source=');
+  Future<List<AudioModel>> getAudios() async {
+    final response = await _api.get('/audio/');
     final list = response['audios'] as List<dynamic>;
     return list.map((j) => AudioModel.fromJson(j as Map<String, dynamic>)).toList();
   }
 
-  Future<AudioModel> uploadAudio(String filePath, double duration) async {
-    final request = http.MultipartRequest('POST', Uri.parse('/audio/upload'));
+  Future<AudioModel> uploadAudio(String filePath, double duracion, {String? fotoFondo}) async {
+    final request = http.MultipartRequest('POST', Uri.parse('${ApiService.baseUrl}/audio/upload'));
     final token = ApiService.token;
     if (token != null) {
-      request.headers['Authorization'] = 'Bearer ';
+      request.headers['Authorization'] = 'Bearer $token';
     }
-    request.fields['duration'] = duration.toString();
+    request.fields['duracion'] = duracion.toString();
+    if (fotoFondo != null) request.fields['foto_fondo'] = fotoFondo;
     request.files.add(await http.MultipartFile.fromPath('file', filePath));
 
     final streamedResponse = await request.send().timeout(const Duration(seconds: 60));
@@ -33,28 +34,19 @@ class AudioService {
   }
 
   Future<Map<String, dynamic>> toggleLike(String audioId) async {
-    return await _api.post('/audio//like', {});
+    return await _api.post('/audio/$audioId/like', {});
   }
 
-  Future<AudioCommentModel> addComment(String audioId, String text) async {
-    final response = await _api.post('/audio//comment', {'text': text});
-    return AudioCommentModel.fromJson(response);
+  Future<ComentarioModel> addComment(String audioId, String texto) async {
+    final response = await _api.post('/audio/$audioId/comentario', {'texto': texto});
+    return ComentarioModel.fromJson(response);
   }
 
-  Future<List<AudioCommentModel>> getComments(String audioId) async {
-    final response = await _api.get('/audio//comments');
+  Future<List<ComentarioModel>> getComments(String audioId) async {
+    final response = await _api.get('/audio/$audioId/comentarios');
     final list = response as List<dynamic>;
-    return list.map((j) => AudioCommentModel.fromJson(j as Map<String, dynamic>)).toList();
-  }
-
-  Future<void> updateProgress(String audioId, double progressSeconds, bool completed) async {
-    await _api.post('/audio//progress', {
-      'progress_seconds': progressSeconds,
-      'completed': completed,
-    });
+    return list.map((j) => ComentarioModel.fromJson(j as Map<String, dynamic>)).toList();
   }
 
   void dispose() => _api.dispose();
 }
-
-

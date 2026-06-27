@@ -23,6 +23,7 @@ class _CodeVerificationScreenState extends State<CodeVerificationScreen> {
   @override
   void dispose() {
     _codeController.dispose();
+    _api.dispose();
     super.dispose();
   }
 

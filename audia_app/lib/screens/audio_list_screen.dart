@@ -206,10 +206,6 @@ class _AudioCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final provider = context.watch<AudioProvider>();
-    final progress = provider.listenProgress(audio.id);
-    final isComplete = provider.isCompleted(audio.id);
-    final circleValue = 1.0 - progress;
-    final showRing = !isComplete && circleValue > 0.01;
     final isLiked = audio.isLiked;
     final isCurrentAudio = provider.currentAudio?.id == audio.id;
     final isCurrentlyPlaying = isCurrentAudio && provider.isPlaying;
@@ -225,9 +221,9 @@ class _AudioCard extends StatelessWidget {
           children: [
             Positioned.fill(
               child: Image.network(
-                'https://picsum.photos/seed//400/300',
+                'https://picsum.photos/seed/${audio.id}/400/300',
                 fit: BoxFit.cover,
-                errorBuilder: (_, __, ___) => Container(color: _cardColorForDuration(audio.duration)),
+                errorBuilder: (_, __, ___) => Container(color: _cardColorForDuration(audio.duracion)),
               ),
             ),
             Positioned.fill(
@@ -258,51 +254,34 @@ class _AudioCard extends StatelessWidget {
                     : const Icon(Icons.music_note, size: 14, color: Colors.black),
               ),
             ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
-              child: Column(
-                children: [
-                  const Spacer(),
-                  SizedBox(
-                    width: 64,
-                    height: 64,
-                    child: Stack(
-                      alignment: Alignment.center,
-                      children: [
-                        if (showRing)
-                          SizedBox(
-                            width: 64,
-                            height: 64,
-                            child: CircularProgressIndicator(
-                              value: circleValue,
-                              strokeWidth: 2.5,
-                              backgroundColor: Colors.white12,
-                              valueColor: const AlwaysStoppedAnimation(AppTheme.primaryColor),
-                            ),
-                          ),
-                        CircleAvatar(
-                          radius: 27,
-                          backgroundImage: audio.fotoPerfil != null
-                              ? NetworkImage(audio.fotoPerfil!)
-                              : null,
-                          onBackgroundImageError: (_, __) {},
-                          child: audio.fotoPerfil == null
-                              ? const Icon(Icons.person, size: 28, color: Colors.white70)
-                              : null,
-                        ),
-                      ],
-                    ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
+                  child: Column(
+                    children: [
+                      const Spacer(),
+                      CircleAvatar(
+                        radius: 27,
+                        backgroundImage: audio.fotoPerfil != null
+                            ? NetworkImage(audio.fotoPerfil!)
+                            : null,
+                        onBackgroundImageError: (_, __) {},
+                        child: audio.fotoPerfil == null
+                            ? const Icon(Icons.person, size: 28, color: Colors.white70)
+                            : null,
+                      ),
+                    ],
                   ),
-                  const SizedBox(height: 6),
-                  Text(
-                    _formatDuration(audio.duration),
-                    style: const TextStyle(color: Colors.white70, fontSize: 11),
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    audio.nombreUsuario,
-                    style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w600),
-                    maxLines: 1,
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  _formatDuration(audio.duracion),
+                  style: const TextStyle(color: Colors.white70, fontSize: 11),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  audio.nombreUsuario,
+                  style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w600),
+                  maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     textAlign: TextAlign.center,
                   ),
@@ -324,7 +303,7 @@ class _AudioCard extends StatelessWidget {
                                 color: isLiked ? Colors.red : Colors.white,
                               ),
                               const SizedBox(width: 4),
-                              Text('',
+                              Text('${audio.numLikes}',
                                 style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w600)),
                             ],
                           ),
@@ -337,7 +316,7 @@ class _AudioCard extends StatelessWidget {
                             children: [
                               const Icon(Icons.chat_bubble, size: 20, color: Colors.white),
                               const SizedBox(width: 4),
-                              Text('',
+                              Text('${audio.numComentarios}',
                                 style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w600)),
                             ],
                           ),
@@ -365,7 +344,7 @@ class _CommentsSheet extends StatefulWidget {
 
 class _CommentsSheetState extends State<_CommentsSheet> {
   final _controller = TextEditingController();
-  List<AudioCommentModel> _comments = [];
+  List<ComentarioModel> _comments = [];
   bool _loading = true;
 
   @override
@@ -464,7 +443,7 @@ class _CommentsSheetState extends State<_CommentsSheet> {
                                         Text(c.nombreUsuario,
                                           style: const TextStyle(color: AppTheme.primaryColor, fontSize: 13, fontWeight: FontWeight.w600)),
                                         const SizedBox(height: 2),
-                                        Text(c.text, style: const TextStyle(color: Colors.white, fontSize: 14)),
+                                        Text(c.texto, style: const TextStyle(color: Colors.white, fontSize: 14)),
                                       ],
                                     ),
                                   ),

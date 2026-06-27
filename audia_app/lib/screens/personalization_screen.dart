@@ -124,17 +124,18 @@ class _PersonalizationScreenState extends State<PersonalizationScreen> {
         fotoBase64 = base64Encode(bytes);
       }
 
-      await _api.post('/personalizacion/', {
+      await _api.post('/perfil/', {
         'cuenta_id': user.userId,
-        'ano_nacimiento': _fechaNacimiento.year,
+        'fecha_nacimiento': _fechaNacimiento.toIso8601String().split('T')[0],
         'sexo': _sexo,
         'nombre_usuario': _nombreUsuario,
-        'gustos': _biografia,
+        'biografia': _biografia,
         'foto_perfil': fotoBase64,
         'idioma': _idioma,
       });
 
       if (!mounted) return;
+      context.read<AuthProvider>().markPerfilCreado();
       context.go(AppRouter.home);
     } catch (e) {
       if (!mounted) return;
@@ -472,7 +473,7 @@ class _UsernameStep extends StatefulWidget {
   const _UsernameStep({required this.value, required this.onChanged});
 
   @override
- State<_UsernameStep> createState() => _UsernameStepState();
+  State<_UsernameStep> createState() => _UsernameStepState();
 }
 
 class _UsernameStepState extends State<_UsernameStep> {
@@ -531,7 +532,7 @@ class _BioStep extends StatefulWidget {
   const _BioStep({required this.value, required this.maxLength, required this.onChanged});
 
   @override
- State<_BioStep> createState() => _BioStepState();
+  State<_BioStep> createState() => _BioStepState();
 }
 
 class _BioStepState extends State<_BioStep> {
@@ -762,4 +763,3 @@ class _LanguageStep extends StatelessWidget {
     );
   }
 }
-

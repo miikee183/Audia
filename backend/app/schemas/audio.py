@@ -1,21 +1,18 @@
 from pydantic import BaseModel
 from typing import Optional
-from datetime import datetime
 
 
 class AudioResponse(BaseModel):
     id: str
-    user_id: str
+    id_cuenta_dueno: str
     nombre_usuario: str
     foto_perfil: Optional[str] = None
-    cloudinary_url: str
-    duration: float
-    like_count: int = 0
-    comment_count: int = 0
+    audio_url: str
+    duracion: float
+    num_likes: int = 0
+    num_comentarios: int = 0
+    foto_fondo: Optional[str] = None
     is_liked: bool = False
-    listen_progress: float = 0.0
-    is_completed: bool = False
-    created_at: datetime
 
     class Config:
         from_attributes = True
@@ -25,24 +22,18 @@ class AudioListResponse(BaseModel):
     audios: list[AudioResponse]
 
 
-class AudioCommentCreate(BaseModel):
-    text: str
+class ComentarioCreate(BaseModel):
+    texto: str
 
 
-class AudioCommentResponse(BaseModel):
+class ComentarioResponse(BaseModel):
     id: str
-    user_id: str
+    id_dueno_comentario: str
     nombre_usuario: str
     foto_perfil: Optional[str] = None
-    text: str
-    like_count: int = 0
+    texto: str
+    num_likes: int = 0
     is_liked: bool = False
-    created_at: datetime
 
     class Config:
         from_attributes = True
-
-
-class AudioProgressRequest(BaseModel):
-    progress_seconds: float
-    completed: bool = False

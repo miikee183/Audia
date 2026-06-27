@@ -1,6 +1,5 @@
 import uuid
-from datetime import datetime
-from sqlalchemy import String, DateTime, Boolean
+from sqlalchemy import String, ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.database.database import Base
 
@@ -13,12 +12,18 @@ class Cuenta(Base):
     correoGoogle: Mapped[str | None] = mapped_column(String(255), unique=True, nullable=True)
     correoAudia: Mapped[str | None] = mapped_column(String(255), unique=True, nullable=True)
     contrasenaAudia: Mapped[str | None] = mapped_column(String(255), nullable=True)
-    personalizado: Mapped[bool] = mapped_column(Boolean, default=False)
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.now)
 
-    personalizacion: Mapped["Personalizacion | None"] = relationship(
-        back_populates="cuenta", uselist=False, cascade="all, delete-orphan"
+    id_perfil: Mapped[str | None] = mapped_column(
+        String(36), ForeignKey("perfiles.id"), unique=True, nullable=True
+    )
+
+    perfil: Mapped["Perfil | None"] = relationship(
+        back_populates="cuenta", uselist=False, single_parent=True,
+        foreign_keys=[id_perfil],
     )
     audios: Mapped[list["Audio"]] = relationship(
-        back_populates="user", cascade="all, delete-orphan"
+        back_populates="dueno", cascade="all, delete-orphan"
+    )
+    comentarios: Mapped[list["Comentario"]] = relationship(
+        back_populates="dueno", cascade="all, delete-orphan"
     )

@@ -1,6 +1,6 @@
 from .cuenta import Cuenta
-from .personalizacion import Personalizacion
+from .personalizacion import Perfil
 from .codigo_verificacion import CodigoVerificacion
-from .audio import Audio, AudioLike, AudioComment, AudioListen
+from .audio import Audio, Comentario
 
-__all__ = ["Cuenta", "Personalizacion", "CodigoVerificacion", "Audio", "AudioLike", "AudioComment", "AudioListen"]
+__all__ = ["Cuenta", "Perfil", "CodigoVerificacion", "Audio", "Comentario"]
