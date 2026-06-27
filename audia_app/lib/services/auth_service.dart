@@ -21,16 +21,16 @@ class AuthService {
   late final GoogleSignIn _googleSignIn;
   final ApiService _api = ApiService();
 
-  static String get _effectiveWebClientId {
-    const env = String.fromEnvironment('GOOGLE_WEB_CLIENT_ID');
-    return env.isNotEmpty ? env : '';
-  }
-
   AuthService({String? iosClientId, String? serverClientId})
       : _googleSignIn = GoogleSignIn(
           clientId: iosClientId,
-          serverClientId: serverClientId ?? (_effectiveWebClientId.isNotEmpty ? _effectiveWebClientId : null),
+          serverClientId: serverClientId ?? _defaultWebClientId,
         );
+
+  static const _defaultWebClientId = String.fromEnvironment(
+    'GOOGLE_WEB_CLIENT_ID',
+    defaultValue: '615052367691-hi0gjbtauj2lb4ctd27ol69297j68274.apps.googleusercontent.com',
+  );
 
   Future<AuthResult> signInWithGoogle({String? telefono}) async {
     final account = await _googleSignIn.signIn();
