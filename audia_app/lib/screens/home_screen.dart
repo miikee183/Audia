@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -8,8 +8,9 @@ class HomeScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(title: const Text('Audia Home')),
       body: const Center(
-        child: Text('¡Bienvenido a Audia! Tu cuenta está configurada.', style: TextStyle(color: Colors.white, fontSize: 18), textAlign: TextAlign.center,),
+        child: Text('Â¡Bienvenido a Audia! Tu cuenta estÃ¡ configurada.', style: TextStyle(color: Colors.white, fontSize: 18), textAlign: TextAlign.center,),
       ),
     );
   }
 }
+

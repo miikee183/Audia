@@ -1,11 +1,11 @@
-import 'package:go_router/go_router.dart';
+﻿import 'package:go_router/go_router.dart';
 import 'screens/splash_screen.dart';
 import 'screens/phone_screen.dart';
 import 'screens/login_screen.dart';
 import 'screens/sign_up_screen.dart';
 import 'screens/personalization_screen.dart';
 import 'screens/code_verification_screen.dart';
-import 'screens/home_screen.dart';
+import 'screens/main_shell.dart';
 
 class AppRouter {
   AppRouter._();
@@ -53,9 +53,8 @@ class AppRouter {
       ),
       GoRoute(
         path: home,
-        builder: (_, _) => const HomeScreen(),
+        builder: (_, _) => const MainShell(),
       ),
     ],
   );
-
 }

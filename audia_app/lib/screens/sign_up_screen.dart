@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import '../services/api_service.dart';
@@ -80,11 +80,11 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     keyboardType: TextInputType.emailAddress,
                     validator: (v) {
                       if (v == null || v.isEmpty) return 'Ingresa tu correo';
-                      if (!RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$').hasMatch(v)) return 'Correo inválido';
+                      if (!RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$').hasMatch(v)) return 'Correo invÃ¡lido';
                       return null;
                     },
                     decoration: const InputDecoration(
-                      labelText: 'Correo electrónico',
+                      labelText: 'Correo electrÃ³nico',
                       prefixIcon: Icon(Icons.email_outlined, color: AppTheme.primaryColor),
                     ),
                   ),
@@ -93,12 +93,12 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     controller: _passwordController,
                     obscureText: _obscurePassword,
                     validator: (v) {
-                      if (v == null || v.isEmpty) return 'Ingresa tu contraseña';
-                      if (v.length < 6) return 'Mínimo 6 caracteres';
+                      if (v == null || v.isEmpty) return 'Ingresa tu contraseÃ±a';
+                      if (v.length < 6) return 'MÃ­nimo 6 caracteres';
                       return null;
                     },
                     decoration: InputDecoration(
-                      labelText: 'Contraseña',
+                      labelText: 'ContraseÃ±a',
                       prefixIcon: const Icon(Icons.lock_outline, color: AppTheme.primaryColor),
                       suffixIcon: IconButton(
                         icon: Icon(
@@ -120,10 +120,10 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Text('¿Ya tienes cuenta? ', style: TextStyle(color: Colors.white.withAlpha(180))),
+                      Text('Â¿Ya tienes cuenta? ', style: TextStyle(color: Colors.white.withAlpha(180))),
                       TextButton(
                         onPressed: () => context.pop(),
-                        child: const Text('Inicia sesión'),
+                        child: const Text('Inicia sesiÃ³n'),
                       ),
                     ],
                   ),
@@ -136,3 +136,4 @@ class _SignUpScreenState extends State<SignUpScreen> {
     );
   }
 }
+

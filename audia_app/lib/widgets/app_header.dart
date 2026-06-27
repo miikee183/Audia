@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 
 class AppHeader extends StatelessWidget {
   final double logoSize;
@@ -38,3 +38,4 @@ class AppHeader extends StatelessWidget {
     );
   }
 }
+

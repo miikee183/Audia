@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
@@ -211,11 +211,11 @@ class _EmailField extends StatelessWidget {
       validator: (value) {
         if (value == null || value.isEmpty) return 'Ingresa tu correo';
         final emailRegex = RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$');
-        if (!emailRegex.hasMatch(value)) return 'Correo inválido';
+        if (!emailRegex.hasMatch(value)) return 'Correo invÃ¡lido';
         return null;
       },
       decoration: const InputDecoration(
-        labelText: 'Correo electrónico',
+        labelText: 'Correo electrÃ³nico',
         prefixIcon: Icon(Icons.email_outlined, color: AppTheme.primaryColor),
       ),
     );
@@ -239,12 +239,12 @@ class _PasswordField extends StatelessWidget {
       controller: controller,
       obscureText: obscure,
       validator: (value) {
-        if (value == null || value.isEmpty) return 'Ingresa tu contraseña';
-        if (value.length < 6) return 'Mínimo 6 caracteres';
+        if (value == null || value.isEmpty) return 'Ingresa tu contraseÃ±a';
+        if (value.length < 6) return 'MÃ­nimo 6 caracteres';
         return null;
       },
       decoration: InputDecoration(
-        labelText: 'Contraseña',
+        labelText: 'ContraseÃ±a',
         prefixIcon: const Icon(Icons.lock_outline, color: AppTheme.primaryColor),
         suffixIcon: IconButton(
           icon: Icon(
@@ -265,7 +265,7 @@ class _ForgotPasswordButton extends StatelessWidget {
       alignment: Alignment.centerRight,
       child: TextButton(
         onPressed: () {},
-        child: const Text('¿Has olvidado tu contraseña?'),
+        child: const Text('Â¿Has olvidado tu contraseÃ±a?'),
       ),
     );
   }
@@ -283,7 +283,7 @@ class _LoginButton extends StatelessWidget {
       onPressed: isLoading ? null : onPressed,
       child: isLoading
           ? const SizedBox(width: 24, height: 24, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.black))
-          : const Text('Iniciar sesión'),
+          : const Text('Iniciar sesiÃ³n'),
     );
   }
 }
@@ -299,7 +299,7 @@ class _RegisterLink extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         Text(
-          '¿No tienes cuenta? ',
+          'Â¿No tienes cuenta? ',
           style: TextStyle(color: Colors.white.withAlpha(180)),
         ),
         TextButton(
@@ -310,9 +310,10 @@ class _RegisterLink extends StatelessWidget {
               context.push(AppRouter.signUp);
             }
           },
-          child: const Text('Regístrate'),
+          child: const Text('RegÃ­strate'),
         ),
       ],
     );
   }
 }
+

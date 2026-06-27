@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../services/api_service.dart';
 import '../theme/app_theme.dart';
@@ -37,7 +37,7 @@ class _CodeVerificationScreenState extends State<CodeVerificationScreen> {
       });
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Cuenta verificada. Inicia sesión.')),
+        const SnackBar(content: Text('Cuenta verificada. Inicia sesiÃ³n.')),
       );
       context.go('${AppRouter.login}?telefono=${Uri.encodeQueryComponent(widget.telefono)}');
     } catch (e) {
@@ -65,12 +65,12 @@ class _CodeVerificationScreenState extends State<CodeVerificationScreen> {
                   const AppHeader(logoSize: 80, fontSize: 28, spacing: 12),
                   const SizedBox(height: 40),
                   const Text(
-                    'Introduce código',
+                    'Introduce cÃ³digo',
                     style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold, color: Colors.white),
                   ),
                   const SizedBox(height: 12),
                   Text(
-                    'Se envió un código a tu número',
+                    'Se enviÃ³ un cÃ³digo a tu nÃºmero',
                     style: TextStyle(fontSize: 14, color: Colors.white.withAlpha(180)),
                   ),
                   const SizedBox(height: 32),
@@ -96,7 +96,7 @@ class _CodeVerificationScreenState extends State<CodeVerificationScreen> {
                       ),
                     ),
                     validator: (value) {
-                      if (value == null || value.length != 4) return 'Ingresa el código de 4 dígitos';
+                      if (value == null || value.length != 4) return 'Ingresa el cÃ³digo de 4 dÃ­gitos';
                       return null;
                     },
                   ),
@@ -104,12 +104,16 @@ class _CodeVerificationScreenState extends State<CodeVerificationScreen> {
                   ElevatedButton(
                     onPressed: _isLoading ? null : _verifyCode,
                     style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF6C63FF),
+                      foregroundColor: Colors.black,
+                      disabledBackgroundColor: const Color(0xFF6C63FF).withAlpha(80),
+                      disabledForegroundColor: Colors.black45,
                       minimumSize: const Size(double.infinity, 56),
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                     ),
                     child: _isLoading
                         ? const SizedBox(width: 24, height: 24, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.black))
-                        : const Text('Verificar código', style: TextStyle(fontSize: 16)),
+                        : const Text('Verificar cÃ³digo', style: TextStyle(fontSize: 16)),
                   ),
                 ],
               ),
@@ -120,3 +124,4 @@ class _CodeVerificationScreenState extends State<CodeVerificationScreen> {
     );
   }
 }
+

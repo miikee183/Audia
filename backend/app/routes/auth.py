@@ -103,9 +103,18 @@ def google_auth(request: GoogleAuthRequest, db: Session = Depends(get_db)):
     if not email:
         raise HTTPException(status_code=400, detail="Email not provided by Google")
 
-    cuenta = db.query(Cuenta).filter(Cuenta.correoGoogle == email).first()
-    if cuenta:
-        return _cuenta_to_response(cuenta)
+    # Verificar si el correo ya está usado (Google o Audia)
+    existente = (
+        db.query(Cuenta)
+        .filter((Cuenta.correoGoogle == email) | (Cuenta.correoAudia == email))
+        .first()
+    )
+    if existente:
+        # Si es exactamente el mismo Google, login normal
+        if existente.correoGoogle == email:
+            return _cuenta_to_response(existente)
+        # Si el correo está registrado como Audia, bloquear
+        raise HTTPException(status_code=400, detail="El correo ya está registrado con otra cuenta")
 
     # Si se proporciona telefono, vincular con la cuenta de teléfono existente
     if request.telefono:
@@ -127,7 +136,11 @@ def google_auth(request: GoogleAuthRequest, db: Session = Depends(get_db)):
 
 @router.post("/signup", response_model=AuthResponse)
 def signup(request: SignUpRequest, db: Session = Depends(get_db)):
-    existing = db.query(Cuenta).filter(Cuenta.correoAudia == request.email).first()
+    existing = (
+        db.query(Cuenta)
+        .filter((Cuenta.correoAudia == request.email) | (Cuenta.correoGoogle == request.email))
+        .first()
+    )
     if existing:
         raise HTTPException(status_code=400, detail="El correo ya está registrado")
 
@@ -175,9 +188,13 @@ def link_google(
     if not email:
         raise HTTPException(status_code=400, detail="Email not provided by Google")
 
-    taken = db.query(Cuenta).filter(Cuenta.correoGoogle == email).first()
+    taken = (
+        db.query(Cuenta)
+        .filter((Cuenta.correoGoogle == email) | (Cuenta.correoAudia == email))
+        .first()
+    )
     if taken:
-        raise HTTPException(status_code=400, detail="Ese correo de Google ya está vinculado a otra cuenta")
+        raise HTTPException(status_code=400, detail="Ese correo ya está vinculado a otra cuenta")
 
     cuenta = db.query(Cuenta).filter(Cuenta.id == account_id).first()
     if not cuenta:
@@ -196,7 +213,11 @@ def link_email(
     account_id: str = Depends(get_current_account),
 ):
     """Vincula email/contraseña a la cuenta autenticada."""
-    taken = db.query(Cuenta).filter(Cuenta.correoAudia == request.email).first()
+    taken = (
+        db.query(Cuenta)
+        .filter((Cuenta.correoAudia == request.email) | (Cuenta.correoGoogle == request.email))
+        .first()
+    )
     if taken:
         raise HTTPException(status_code=400, detail="Ese correo ya está registrado")
 

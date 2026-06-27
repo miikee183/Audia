@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 
 class AppTheme {
   AppTheme._();
@@ -18,6 +18,10 @@ class AppTheme {
         surface: surfaceColor,
       ),
       scaffoldBackgroundColor: backgroundColor,
+      appBarTheme: const AppBarTheme(
+        backgroundColor: backgroundColor,
+        elevation: 0,
+      ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
         fillColor: surfaceColor,
@@ -59,3 +63,4 @@ class AppTheme {
     );
   }
 }
+

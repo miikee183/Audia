@@ -1,12 +1,17 @@
-import 'dart:convert';
+﻿import 'dart:convert';
 import 'dart:io';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:image_cropper/image_cropper.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 import '../providers/auth_provider.dart';
 import '../services/api_service.dart';
 import '../app_router.dart';
+import '../theme/app_theme.dart';
+
+const _maxBioLength = 300;
 
 class PersonalizationScreen extends StatefulWidget {
   const PersonalizationScreen({super.key});
@@ -22,21 +27,34 @@ class _PersonalizationScreenState extends State<PersonalizationScreen> {
   final ApiService _api = ApiService();
   final ImagePicker _picker = ImagePicker();
 
-  int? _anoNacimiento;
+  DateTime _fechaNacimiento = DateTime(2000, 1, 1);
   String? _sexo;
   String _nombreUsuario = '';
-  String _gustos = '';
+  String _biografia = '';
   File? _fotoPerfil;
-  String _idioma = 'Español';
+  String? _idioma;
 
   final List<String> _sexoOptions = ['Hombre', 'Mujer', 'Otro'];
-  final List<String> _idiomaOptions = ['Español', 'Inglés', 'Francés', 'Portugués'];
+
+  static const Map<String, String> _idiomas = {
+    'English': 'English',
+    'EspaÃ±ol': 'EspaÃ±ol',
+    'FranÃ§ais': 'FranÃ§ais',
+    'PortuguÃªs': 'PortuguÃªs',
+    'Deutsch': 'Deutsch',
+    'Italiano': 'Italiano',
+    'Ð ÑƒÑÑÐºÐ¸Ð¹': 'Ð ÑƒÑÑÐºÐ¸Ð¹',
+    'Ø§Ù„Ø¹Ø±Ø¨ÙŠØ©': 'Ø§Ù„Ø¹Ø±Ø¨ÙŠØ©',
+    'ä¸­æ–‡': 'ä¸­æ–‡',
+    'í•œêµ­ì–´': 'í•œêµ­ì–´',
+    'æ—¥æœ¬èªž': 'æ—¥æœ¬èªž',
+  };
 
   final List<String> _stepTitles = [
-    'Año de nacimiento',
+    'Fecha de nacimiento',
     'Sexo',
     'Nombre de Usuario',
-    'Gustos',
+    'BiografÃ­a',
     'Foto de perfil',
     'Idioma',
   ];
@@ -50,17 +68,17 @@ class _PersonalizationScreenState extends State<PersonalizationScreen> {
   bool _isCurrentStepValid() {
     switch (_currentStep) {
       case 0:
-        return _anoNacimiento != null;
+        return true;
       case 1:
         return _sexo != null;
       case 2:
         return _nombreUsuario.trim().isNotEmpty;
       case 3:
-        return _gustos.trim().isNotEmpty;
+        return _biografia.length <= _maxBioLength;
       case 4:
         return true;
       case 5:
-        return _idioma.isNotEmpty;
+        return _idioma != null;
       default:
         return true;
     }
@@ -73,6 +91,7 @@ class _PersonalizationScreenState extends State<PersonalizationScreen> {
       );
       return;
     }
+    FocusScope.of(context).unfocus();
     if (_currentStep < _stepTitles.length - 1) {
       _pageController.nextPage(
         duration: const Duration(milliseconds: 300),
@@ -107,10 +126,10 @@ class _PersonalizationScreenState extends State<PersonalizationScreen> {
 
       await _api.post('/personalizacion/', {
         'cuenta_id': user.userId,
-        'ano_nacimiento': _anoNacimiento,
+        'ano_nacimiento': _fechaNacimiento.year,
         'sexo': _sexo,
         'nombre_usuario': _nombreUsuario,
-        'gustos': _gustos,
+        'gustos': _biografia,
         'foto_perfil': fotoBase64,
         'idioma': _idioma,
       });
@@ -129,20 +148,81 @@ class _PersonalizationScreenState extends State<PersonalizationScreen> {
 
   String _stepQuestion(int step) {
     const questions = [
-      '¿En qué año naciste?',
-      '¿Cuál es tu sexo?',
+      'Â¿CuÃ¡ndo naciste?',
+      'Â¿CuÃ¡l es tu sexo?',
       'Elige un nombre de usuario',
-      '¿Qué te gusta?',
-      'Añade una foto de perfil',
-      '¿Qué idioma prefieres?',
+      'BiografÃ­a',
+      'Foto de perfil',
+      'Idioma',
     ];
     return questions[step];
+  }
+
+  void _showDatePicker() {
+    final now = DateTime.now();
+    final minDate = DateTime(now.year - 100, 1, 1);
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: AppTheme.surfaceColor,
+      builder: (_) => SizedBox(
+        height: 280,
+        child: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  TextButton(
+                    onPressed: () => Navigator.pop(context),
+                    child: const Text('Cancelar', style: TextStyle(color: Colors.white60)),
+                  ),
+                  TextButton(
+                    onPressed: () {
+                      Navigator.pop(context);
+                      setState(() {});
+                    },
+                    child: const Text('Listo', style: TextStyle(color: AppTheme.primaryColor, fontWeight: FontWeight.bold)),
+                  ),
+                ],
+              ),
+            ),
+            Expanded(
+              child: CupertinoTheme(
+                data: const CupertinoThemeData(
+                  brightness: Brightness.dark,
+                  textTheme: CupertinoTextThemeData(
+                    dateTimePickerTextStyle: TextStyle(
+                      color: Colors.white,
+                      fontSize: 22,
+                    ),
+                  ),
+                ),
+                child: CupertinoDatePicker(
+                  initialDateTime: _fechaNacimiento,
+                  minimumDate: minDate,
+                  maximumDate: now,
+                  mode: CupertinoDatePickerMode.date,
+                  onDateTimeChanged: (v) => _fechaNacimiento = v,
+                  backgroundColor: AppTheme.surfaceColor,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  String _formatDate(DateTime date) {
+    return '${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${date.year}';
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF1A1A2E),
+      resizeToAvoidBottomInset: false,
+      backgroundColor: const Color(0xFF000000),
       body: SafeArea(
         child: _isLoading
             ? const Center(child: CircularProgressIndicator())
@@ -183,27 +263,65 @@ class _PersonalizationScreenState extends State<PersonalizationScreen> {
                       physics: const NeverScrollableScrollPhysics(),
                       onPageChanged: (i) => setState(() => _currentStep = i),
                       children: [
-                        _BirthYearStep(value: _anoNacimiento, onChanged: (v) => _anoNacimiento = v),
-                        _SexStep(value: _sexo, options: _sexoOptions, onChanged: (v) => _sexo = v),
-                        _UsernameStep(value: _nombreUsuario, onChanged: (v) => _nombreUsuario = v),
-                        _InterestsStep(value: _gustos, onChanged: (v) => _gustos = v),
+                        _DateStep(
+                          date: _fechaNacimiento,
+                          formatted: _formatDate(_fechaNacimiento),
+                          onTap: _showDatePicker,
+                        ),
+                        _SexStep(value: _sexo, options: _sexoOptions, onChanged: (v) => setState(() => _sexo = v)),
+                        _UsernameStep(value: _nombreUsuario, onChanged: (v) => setState(() => _nombreUsuario = v)),
+                        _BioStep(value: _biografia, maxLength: _maxBioLength, onChanged: (v) => setState(() => _biografia = v)),
                         _PhotoStep(
                           file: _fotoPerfil,
                           onPickGallery: () async {
                             final picked = await _picker.pickImage(source: ImageSource.gallery, imageQuality: 80);
-                            if (picked != null) setState(() => _fotoPerfil = File(picked.path));
+                            if (picked != null) {
+                              final cropped = await ImageCropper().cropImage(
+                                sourcePath: picked.path,
+                                uiSettings: [
+                                  AndroidUiSettings(
+                                    toolbarTitle: 'Ajustar foto',
+                                    toolbarColor: const Color(0xFF1A1A1A),
+                                    toolbarWidgetColor: Colors.white,
+                                    backgroundColor: Colors.black,
+                                    statusBarColor: Colors.black,
+                                    activeControlsWidgetColor: const Color(0xFF6C63FF),
+                                    cropStyle: CropStyle.circle,
+                                    lockAspectRatio: true,
+                                    aspectRatioPresets: [CropAspectRatioPreset.square],
+                                    hideBottomControls: true,
+                                  ),
+                                ],
+                              );
+                              if (cropped != null) setState(() => _fotoPerfil = File(cropped.path));
+                            }
                           },
                           onPickCamera: () async {
                             final picked = await _picker.pickImage(source: ImageSource.camera, imageQuality: 80);
-                            if (picked != null) setState(() => _fotoPerfil = File(picked.path));
+                            if (picked != null) {
+                              final cropped = await ImageCropper().cropImage(
+                                sourcePath: picked.path,
+                                uiSettings: [
+                                  AndroidUiSettings(
+                                    toolbarTitle: 'Ajustar foto',
+                                    toolbarColor: const Color(0xFF1A1A1A),
+                                    toolbarWidgetColor: Colors.white,
+                                    backgroundColor: Colors.black,
+                                    statusBarColor: Colors.black,
+                                    activeControlsWidgetColor: const Color(0xFF6C63FF),
+                                    cropStyle: CropStyle.circle,
+                                    lockAspectRatio: true,
+                                    aspectRatioPresets: [CropAspectRatioPreset.square],
+                                    hideBottomControls: true,
+                                  ),
+                                ],
+                              );
+                              if (cropped != null) setState(() => _fotoPerfil = File(cropped.path));
+                            }
                           },
                           onRemove: () => setState(() => _fotoPerfil = null),
                         ),
-                        _LanguageStep(
-                          value: _idioma,
-                          options: _idiomaOptions,
-                          onChanged: (v) => _idioma = v,
-                        ),
+                        _LanguageStep(value: _idioma, idiomas: _idiomas, onChanged: (v) => setState(() => _idioma = v)),
                       ],
                     ),
                   ),
@@ -220,21 +338,25 @@ class _PersonalizationScreenState extends State<PersonalizationScreen> {
                                 padding: const EdgeInsets.symmetric(vertical: 16),
                                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                               ),
-                              child: const Text('Atrás', style: TextStyle(color: Colors.white, fontSize: 16)),
+                              child: const Text('AtrÃ¡s', style: TextStyle(color: Colors.white, fontSize: 16)),
                             ),
                           ),
                         if (_currentStep > 0) const SizedBox(width: 16),
                         Expanded(
                           child: ElevatedButton(
-                            onPressed: _nextStep,
+                            onPressed: _isCurrentStepValid() ? _nextStep : null,
                             style: ElevatedButton.styleFrom(
                               backgroundColor: const Color(0xFF6C63FF),
+                              disabledBackgroundColor: Colors.white.withAlpha(20),
                               padding: const EdgeInsets.symmetric(vertical: 16),
                               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                             ),
                             child: Text(
                               _currentStep == _stepTitles.length - 1 ? 'Listo' : 'Siguiente',
-                              style: const TextStyle(fontSize: 16, color: Colors.white),
+                              style: TextStyle(
+                                fontSize: 16,
+                                color: _isCurrentStepValid() ? Colors.black : Colors.white38,
+                              ),
                             ),
                           ),
                         ),
@@ -248,11 +370,12 @@ class _PersonalizationScreenState extends State<PersonalizationScreen> {
   }
 }
 
-class _BirthYearStep extends StatelessWidget {
-  final int? value;
-  final ValueChanged<int?> onChanged;
+class _DateStep extends StatelessWidget {
+  final DateTime date;
+  final String formatted;
+  final VoidCallback onTap;
 
-  const _BirthYearStep({required this.value, required this.onChanged});
+  const _DateStep({required this.date, required this.formatted, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -260,21 +383,35 @@ class _BirthYearStep extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 24),
       child: Column(
         children: [
-          Expanded(
-            child: Center(
-              child: TextField(
-                keyboardType: TextInputType.number,
-                textAlign: TextAlign.center,
-                style: const TextStyle(fontSize: 28, color: Colors.white),
-                decoration: InputDecoration(
-                  hintText: 'ej. 1995',
-                  hintStyle: TextStyle(color: Colors.white.withAlpha(80), fontSize: 28),
-                  border: InputBorder.none,
-                ),
-                onChanged: (v) => onChanged(int.tryParse(v)),
+          const Spacer(),
+          GestureDetector(
+            onTap: onTap,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 24),
+              decoration: BoxDecoration(
+                color: AppTheme.surfaceColor,
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(color: AppTheme.primaryColor.withAlpha(80)),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(Icons.calendar_today, color: AppTheme.primaryColor, size: 28),
+                  const SizedBox(width: 16),
+                  Text(
+                    formatted,
+                    style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: Colors.white),
+                  ),
+                ],
               ),
             ),
           ),
+          const SizedBox(height: 16),
+          Text(
+            'Toca para cambiar fecha',
+            style: TextStyle(color: Colors.white.withAlpha(100), fontSize: 14),
+          ),
+          const Spacer(flex: 2),
         ],
       ),
     );
@@ -293,6 +430,7 @@ class _SexStep extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 24),
       child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
         children: options.map((option) {
           final isSelected = value == option;
           return Padding(
@@ -327,44 +465,39 @@ class _SexStep extends StatelessWidget {
   }
 }
 
-class _UsernameStep extends StatelessWidget {
+class _UsernameStep extends StatefulWidget {
   final String value;
   final ValueChanged<String> onChanged;
 
   const _UsernameStep({required this.value, required this.onChanged});
 
   @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 24),
-      child: Column(
-        children: [
-          Expanded(
-            child: Center(
-              child: TextField(
-                controller: TextEditingController(text: value),
-                textAlign: TextAlign.center,
-                style: const TextStyle(fontSize: 28, color: Colors.white),
-                decoration: InputDecoration(
-                  hintText: '@usuario',
-                  hintStyle: TextStyle(color: Colors.white.withAlpha(80), fontSize: 28),
-                  border: InputBorder.none,
-                ),
-                onChanged: onChanged,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
+ State<_UsernameStep> createState() => _UsernameStepState();
 }
 
-class _InterestsStep extends StatelessWidget {
-  final String value;
-  final ValueChanged<String> onChanged;
+class _UsernameStepState extends State<_UsernameStep> {
+  late final TextEditingController _controller;
 
-  const _InterestsStep({required this.value, required this.onChanged});
+  @override
+  void initState() {
+    super.initState();
+    _controller = TextEditingController(text: widget.value);
+    _controller.addListener(() => widget.onChanged(_controller.text));
+  }
+
+  @override
+  void didUpdateWidget(_UsernameStep oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.value != oldWidget.value && widget.value != _controller.text) {
+      _controller.text = widget.value;
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -372,21 +505,98 @@ class _InterestsStep extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 24),
       child: Column(
         children: [
-          Expanded(
-            child: Center(
-              child: TextField(
-                maxLines: 4,
-                textAlign: TextAlign.center,
-                style: const TextStyle(fontSize: 20, color: Colors.white),
-                decoration: InputDecoration(
-                  hintText: 'Música, tecnología, viajes...',
-                  hintStyle: TextStyle(color: Colors.white.withAlpha(80), fontSize: 20),
-                  border: InputBorder.none,
+          const Expanded(child: SizedBox()),
+          TextField(
+            controller: _controller,
+            textAlign: TextAlign.center,
+            style: const TextStyle(fontSize: 28, color: Colors.white),
+            decoration: InputDecoration(
+              hintText: 'usuario',
+              hintStyle: TextStyle(color: Colors.white.withAlpha(80), fontSize: 28),
+              border: InputBorder.none,
+            ),
+          ),
+          const Expanded(child: SizedBox()),
+        ],
+      ),
+    );
+  }
+}
+
+class _BioStep extends StatefulWidget {
+  final String value;
+  final int maxLength;
+  final ValueChanged<String> onChanged;
+
+  const _BioStep({required this.value, required this.maxLength, required this.onChanged});
+
+  @override
+ State<_BioStep> createState() => _BioStepState();
+}
+
+class _BioStepState extends State<_BioStep> {
+  late final TextEditingController _controller;
+  int _charCount = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = TextEditingController(text: widget.value);
+    _charCount = widget.value.length;
+    _controller.addListener(() {
+      widget.onChanged(_controller.text);
+      setState(() => _charCount = _controller.text.length);
+    });
+  }
+
+  @override
+  void didUpdateWidget(_BioStep oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.value != oldWidget.value && widget.value != _controller.text) {
+      _controller.text = widget.value;
+      _charCount = widget.value.length;
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final overLimit = _charCount > widget.maxLength;
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 24),
+      child: Column(
+        children: [
+          const Spacer(),
+          TextField(
+            controller: _controller,
+            maxLines: 4,
+            textAlign: TextAlign.center,
+            style: const TextStyle(fontSize: 20, color: Colors.white),
+            decoration: InputDecoration(
+              hintText: 'BiografÃ­a...',
+              hintStyle: TextStyle(color: Colors.white.withAlpha(80), fontSize: 20),
+              border: InputBorder.none,
+            ),
+          ),
+          Align(
+            alignment: Alignment.centerLeft,
+            child: Padding(
+              padding: const EdgeInsets.only(top: 4),
+              child: Text(
+                '$_charCount/${widget.maxLength}',
+                style: TextStyle(
+                  fontSize: 13,
+                  color: overLimit ? Colors.redAccent : Colors.white38,
                 ),
-                onChanged: onChanged,
               ),
             ),
           ),
+          const Spacer(flex: 2),
         ],
       ),
     );
@@ -410,104 +620,146 @@ class _PhotoStep extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 24),
-      child: Column(
-        children: [
-          const Spacer(flex: 2),
-          if (file != null)
-            CircleAvatar(
-              radius: 80,
-              backgroundImage: FileImage(file!),
-            )
-          else
-            CircleAvatar(
-              radius: 80,
-              backgroundColor: Colors.white.withAlpha(20),
-              child: Icon(Icons.person, size: 64, color: Colors.white.withAlpha(100)),
-            ),
-          const SizedBox(height: 24),
-          if (file != null)
-            TextButton.icon(
-              onPressed: onRemove,
-              icon: const Icon(Icons.delete_outline, color: Colors.redAccent),
-              label: const Text('Eliminar foto', style: TextStyle(color: Colors.redAccent)),
-            ),
-          const Spacer(),
-          SizedBox(
-            width: double.infinity,
-            child: ElevatedButton.icon(
-              onPressed: onPickGallery,
-              icon: const Icon(Icons.photo_library_outlined),
-              label: const Text('Elegir de galería'),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF6C63FF),
-                padding: const EdgeInsets.symmetric(vertical: 16),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      child: SingleChildScrollView(
+        child: Column(
+          children: [
+            const SizedBox(height: 40),
+            GestureDetector(
+              onTap: onPickGallery,
+              child: Container(
+                width: 180,
+                height: 180,
+                decoration: BoxDecoration(
+                  color: AppTheme.primaryColor.withAlpha(40),
+                  shape: BoxShape.circle,
+                  border: Border.all(color: AppTheme.primaryColor.withAlpha(120), width: 2),
+                  image: file != null
+                      ? DecorationImage(image: FileImage(file!), fit: BoxFit.cover)
+                      : null,
+                ),
+                child: file == null
+                    ? const Center(
+                        child: Icon(Icons.add, size: 64, color: Colors.black54),
+                      )
+                    : null,
               ),
             ),
-          ),
-          const SizedBox(height: 12),
-          SizedBox(
-            width: double.infinity,
-            child: OutlinedButton.icon(
-              onPressed: onPickCamera,
-              icon: const Icon(Icons.camera_alt_outlined),
-              label: const Text('Tomar foto'),
-              style: OutlinedButton.styleFrom(
-                side: BorderSide(color: Colors.white.withAlpha(60)),
-                padding: const EdgeInsets.symmetric(vertical: 16),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            const SizedBox(height: 16),
+            if (file != null)
+              TextButton.icon(
+                onPressed: onRemove,
+                icon: const Icon(Icons.delete_outline, color: Colors.redAccent),
+                label: const Text('Eliminar foto', style: TextStyle(color: Colors.redAccent)),
+              ),
+            const SizedBox(height: 24),
+            SizedBox(
+              width: double.infinity,
+              child: OutlinedButton.icon(
+                onPressed: onPickCamera,
+                icon: const Icon(Icons.camera_alt_outlined),
+                label: const Text('Tomar foto'),
+                style: OutlinedButton.styleFrom(
+                  side: BorderSide(color: Colors.white.withAlpha(60)),
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                ),
               ),
             ),
-          ),
-          const Spacer(flex: 3),
-        ],
+            const SizedBox(height: 40),
+          ],
+        ),
       ),
     );
   }
 }
 
 class _LanguageStep extends StatelessWidget {
-  final String value;
-  final List<String> options;
-  final ValueChanged<String> onChanged;
+  final String? value;
+  final Map<String, String> idiomas;
+  final ValueChanged<String?> onChanged;
 
-  const _LanguageStep({required this.value, required this.options, required this.onChanged});
+  const _LanguageStep({required this.value, required this.idiomas, required this.onChanged});
 
   @override
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 24),
       child: Column(
-        children: options.map((option) {
-          final isSelected = value == option;
-          return Padding(
-            padding: const EdgeInsets.only(bottom: 12),
-            child: SizedBox(
-              width: double.infinity,
-              child: OutlinedButton(
-                onPressed: () => onChanged(option),
-                style: OutlinedButton.styleFrom(
-                  side: BorderSide(
-                    color: isSelected ? const Color(0xFF6C63FF) : Colors.white.withAlpha(60),
-                    width: isSelected ? 2 : 1,
+        children: [
+          const Spacer(),
+          SizedBox(
+            width: double.infinity,
+            child: OutlinedButton(
+              onPressed: () {
+                showModalBottomSheet(
+                  context: context,
+                  backgroundColor: AppTheme.surfaceColor,
+                  shape: const RoundedRectangleBorder(
+                    borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
                   ),
-                  backgroundColor: isSelected ? const Color(0xFF6C63FF).withAlpha(30) : null,
-                  padding: const EdgeInsets.symmetric(vertical: 20),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                  builder: (_) => Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.all(16),
+                        child: Text(
+                          'Elige un idioma',
+                          style: const TextStyle(color: Colors.white, fontSize: 16),
+                        ),
+                      ),
+                      const Divider(height: 1, color: Colors.white12),
+                      Flexible(
+                        child: ListView.builder(
+                          shrinkWrap: true,
+                          itemCount: idiomas.length,
+                          itemBuilder: (_, i) {
+                            final entry = idiomas.entries.elementAt(i);
+                            final isSelected = value == entry.value;
+                            return ListTile(
+                              title: Text(
+                                entry.key,
+                                style: TextStyle(
+                                  color: isSelected ? AppTheme.primaryColor : Colors.white,
+                                  fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                                ),
+                              ),
+                              trailing: isSelected
+                                  ? const Icon(Icons.check, color: AppTheme.primaryColor)
+                                  : null,
+                              onTap: () {
+                                onChanged(entry.value);
+                                Navigator.pop(context);
+                              },
+                            );
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              },
+              style: OutlinedButton.styleFrom(
+                side: BorderSide(
+                  color: value != null ? AppTheme.primaryColor : Colors.white.withAlpha(60),
+                  width: value != null ? 2 : 1,
                 ),
-                child: Text(
-                  option,
-                  style: TextStyle(
-                    fontSize: 18,
-                    color: isSelected ? const Color(0xFF6C63FF) : Colors.white,
-                    fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                  ),
+                padding: const EdgeInsets.symmetric(vertical: 20),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+              ),
+              child: Text(
+                value ?? 'Elige idioma',
+                style: TextStyle(
+                  fontSize: 18,
+                  color: value != null ? AppTheme.primaryColor : Colors.white60,
+                  fontWeight: value != null ? FontWeight.bold : FontWeight.normal,
                 ),
               ),
             ),
-          );
-        }).toList(),
+          ),
+          const Spacer(flex: 2),
+        ],
       ),
     );
   }
 }
+

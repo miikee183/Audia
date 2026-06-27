@@ -1,5 +1,6 @@
-import 'package:flutter/foundation.dart';
+﻿import 'package:flutter/foundation.dart';
 import '../services/auth_service.dart';
+import '../services/api_service.dart';
 
 enum AuthStatus { unauthenticated, authenticating, authenticated }
 
@@ -30,6 +31,7 @@ class AuthProvider extends ChangeNotifier {
     String? telefono,
     required bool personalizado,
   }) {
+    ApiService.setToken(accessToken);
     _user = AuthResult(
       accessToken: accessToken,
       email: email,
@@ -47,6 +49,9 @@ class AuthProvider extends ChangeNotifier {
 
     try {
       _user = await _authService.signInWithGoogle(telefono: telefono);
+      if (_user != null) {
+        ApiService.setToken(_user!.accessToken);
+      }
       _status = AuthStatus.authenticated;
     } catch (e) {
       _status = AuthStatus.unauthenticated;
@@ -58,8 +63,11 @@ class AuthProvider extends ChangeNotifier {
 
   Future<void> signOut() async {
     await _authService.signOut();
+    ApiService.setToken(null);
     _user = null;
     _status = AuthStatus.unauthenticated;
     notifyListeners();
   }
 }
+
+
