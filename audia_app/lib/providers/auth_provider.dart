@@ -39,7 +39,7 @@ class AuthProvider extends ChangeNotifier {
     );
 
     _user = user;
-    _api.setToken(user.accessToken);
+    ApiService.setToken(user.accessToken);
     notifyListeners();
     return user;
   }
@@ -55,13 +55,13 @@ class AuthProvider extends ChangeNotifier {
     );
 
     _user = user;
-    _api.setToken(user.accessToken);
+    ApiService.setToken(user.accessToken);
     notifyListeners();
   }
 
   void setAuthUser(AuthUser user) {
     _user = user;
-    _api.setToken(user.accessToken);
+    ApiService.setToken(user.accessToken);
     notifyListeners();
   }
 
@@ -80,7 +80,7 @@ class AuthProvider extends ChangeNotifier {
 
   void logout() {
     _user = null;
-    _api.clearToken();
+    ApiService.setToken(null);
     notifyListeners();
   }
 }

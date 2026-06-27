@@ -10,10 +10,7 @@ void main() {
   runApp(
     MultiProvider(
       providers: [
-        ChangeNotifierProvider(create: (_) => AuthProvider(
-          iosClientId: AppConfig.googleIosClientId,
-          serverClientId: AppConfig.googleWebClientId,
-        )),
+        ChangeNotifierProvider(create: (_) => AuthProvider()),
         ChangeNotifierProvider(create: (_) => AudioProvider()),
       ],
       child: const AudiaApp(),

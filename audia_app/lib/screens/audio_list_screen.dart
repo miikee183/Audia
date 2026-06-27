@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../theme/app_theme.dart';
 import '../models/audio_model.dart';
 import '../providers/audio_provider.dart';
+import '../widgets/profile_image.dart';
 
 class AudioListScreen extends StatefulWidget {
   const AudioListScreen({super.key});
@@ -83,7 +84,7 @@ class _AudioGridState extends State<_AudioGrid> {
     super.didChangeDependencies();
     if (!_loaded) {
       _loaded = true;
-      context.read<AudioProvider>().loadAudios(widget.source);
+      context.read<AudioProvider>().loadAudios();
     }
   }
 
@@ -254,77 +255,68 @@ class _AudioCard extends StatelessWidget {
                     : const Icon(Icons.music_note, size: 14, color: Colors.black),
               ),
             ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
-                  child: Column(
-                    children: [
-                      const Spacer(),
-                      CircleAvatar(
-                        radius: 27,
-                        backgroundImage: audio.fotoPerfil != null
-                            ? NetworkImage(audio.fotoPerfil!)
-                            : null,
-                        onBackgroundImageError: (_, __) {},
-                        child: audio.fotoPerfil == null
-                            ? const Icon(Icons.person, size: 28, color: Colors.white70)
-                            : null,
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 6),
-                Text(
-                  _formatDuration(audio.duracion),
-                  style: const TextStyle(color: Colors.white70, fontSize: 11),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  audio.nombreUsuario,
-                  style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w600),
-                  maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 10),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 12),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        _ScaleOnTap(
-                          onTap: onLike,
-                          padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 2),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Icon(
-                                isLiked ? Icons.favorite : Icons.favorite_border,
-                                size: 20,
-                                color: isLiked ? Colors.red : Colors.white,
-                              ),
-                              const SizedBox(width: 4),
-                              Text('${audio.numLikes}',
-                                style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w600)),
-                            ],
-                          ),
-                        ),
-                        _ScaleOnTap(
-                          onTap: onComment,
-                          padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 2),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              const Icon(Icons.chat_bubble, size: 20, color: Colors.white),
-                              const SizedBox(width: 4),
-                              Text('${audio.numComentarios}',
-                                style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w600)),
-                            ],
-                          ),
-                        ),
-                      ],
+            Positioned(
+              bottom: 0, left: 0, right: 0,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    ProfileImage(imageData: audio.fotoPerfil, radius: 27),
+                    const SizedBox(height: 6),
+                    Text(
+                      _formatDuration(audio.duracion),
+                      style: const TextStyle(color: Colors.white70, fontSize: 11),
                     ),
-                  ),
-                ],
+                    const SizedBox(height: 2),
+                    Text(
+                      audio.nombreUsuario,
+                      style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w600),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 10),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 12),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          _ScaleOnTap(
+                            onTap: onLike,
+                            padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 2),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(
+                                  isLiked ? Icons.favorite : Icons.favorite_border,
+                                  size: 20,
+                                  color: isLiked ? Colors.red : Colors.white,
+                                ),
+                                const SizedBox(width: 4),
+                                Text('${audio.numLikes}',
+                                  style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w600)),
+                              ],
+                            ),
+                          ),
+                          _ScaleOnTap(
+                            onTap: onComment,
+                            padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 2),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                const Icon(Icons.chat_bubble, size: 20, color: Colors.white),
+                                const SizedBox(width: 4),
+                                Text('${audio.numComentarios}',
+                                  style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w600)),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
           ],
@@ -427,14 +419,7 @@ class _CommentsSheetState extends State<_CommentsSheet> {
                               child: Row(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  CircleAvatar(
-                                    radius: 16,
-                                    backgroundColor: AppTheme.primaryColor.withAlpha(60),
-                                    backgroundImage: c.fotoPerfil != null ? NetworkImage(c.fotoPerfil!) : null,
-                                    child: c.fotoPerfil == null
-                                        ? const Icon(Icons.person, size: 16, color: Colors.white70)
-                                        : null,
-                                  ),
+                                  ProfileImage(imageData: c.fotoPerfil, radius: 16),
                                   const SizedBox(width: 10),
                                   Expanded(
                                     child: Column(

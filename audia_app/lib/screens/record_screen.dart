@@ -253,7 +253,7 @@ class _RecordScreenState extends State<RecordScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Audio publicado con éxito')),
         );
-        context.read<AudioProvider>().loadAudios('para_ti');
+        context.read<AudioProvider>().loadAudios();
       }
     } catch (e) {
       if (mounted) {
@@ -301,7 +301,7 @@ class _RecordScreenState extends State<RecordScreen> {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text('Audio subido con éxito')),
           );
-          context.read<AudioProvider>().loadAudios('para_ti');
+          context.read<AudioProvider>().loadAudios();
         }
       } catch (e) {
         if (mounted) {

@@ -6,6 +6,7 @@ import 'package:audia/models/audio_model.dart';
 import 'package:audia/models/perfil_model.dart';
 import 'package:audia/services/api_service.dart';
 import 'package:audia/services/perfil_service.dart';
+import 'package:audia/widgets/profile_image.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -114,14 +115,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   itemBuilder: (_, i) {
                     final p = perfiles[i];
                     return ListTile(
-                      leading: CircleAvatar(
-                        radius: 20,
-                        backgroundColor: AppTheme.primaryColor.withAlpha(60),
-                        backgroundImage: p.fotoPerfil != null ? NetworkImage(p.fotoPerfil!) : null,
-                        child: p.fotoPerfil == null
-                            ? const Icon(Icons.person, size: 20, color: Colors.white70)
-                            : null,
-                      ),
+                      leading: ProfileImage(imageData: p.fotoPerfil, radius: 20),
                       title: Text(p.nombreUsuario, style: const TextStyle(color: Colors.white)),
                     );
                   },
@@ -157,14 +151,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           Center(
             child: Column(
               children: [
-                CircleAvatar(
-                  radius: 48,
-                  backgroundColor: AppTheme.primaryColor.withAlpha(60),
-                  backgroundImage: _fotoPerfil != null ? NetworkImage(_fotoPerfil!) : null,
-                  child: _fotoPerfil == null
-                      ? const Icon(Icons.person, size: 48, color: Colors.white70)
-                      : null,
-                ),
+                ProfileImage(imageData: _fotoPerfil, radius: 48),
                 const SizedBox(height: 12),
                 Text(
                   _nombreUsuario.isNotEmpty ? _nombreUsuario : 'Usuario',
@@ -355,15 +342,7 @@ class _ProfileAudioCard extends StatelessWidget {
             child: Column(
               children: [
                 const Spacer(),
-                CircleAvatar(
-                  radius: 27,
-                  child: audio.fotoPerfil != null
-                      ? CircleAvatar(
-                          radius: 27,
-                          backgroundImage: NetworkImage(audio.fotoPerfil!),
-                        )
-                      : const Icon(Icons.person, size: 28, color: Colors.white70),
-                ),
+                ProfileImage(imageData: audio.fotoPerfil, radius: 27),
                 const SizedBox(height: 6),
                 Text(
                   _formatDuration(audio.duracion),
@@ -547,14 +526,7 @@ class _CommentsSheetState extends State<_CommentsSheet> {
                               child: Row(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  CircleAvatar(
-                                    radius: 16,
-                                    backgroundColor: AppTheme.primaryColor.withAlpha(60),
-                                    backgroundImage: c.fotoPerfil != null ? NetworkImage(c.fotoPerfil!) : null,
-                                    child: c.fotoPerfil == null
-                                        ? const Icon(Icons.person, size: 16, color: Colors.white70)
-                                        : null,
-                                  ),
+                                  ProfileImage(imageData: c.fotoPerfil, radius: 16),
                                   const SizedBox(width: 10),
                                   Expanded(
                                     child: Column(
