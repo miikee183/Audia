@@ -1,3 +1,5 @@
+![Logo](assets/imagenes/Logo.jpeg)
+
 # Audia
 
 Audia es una plataforma social de audio que te permite grabar y compartir clips de voz cortos (hasta 60 segundos) con tus amigos y seguidores. Es como una red social basada en voz: graba, publica, da like y comenta en publicaciones de audio.
@@ -18,9 +20,9 @@ Audia es una plataforma social de audio que te permite grabar y compartir clips 
 
 | | | |
 |:---:|:---:|:---:|
-| ![1](imagenes/readme1.jpeg) | ![2](imagenes/readme2.jpeg) | ![3](imagenes/readme3.jpeg) |
-| ![4](imagenes/readme4.jpeg) | ![5](imagenes/readme5.jpeg) | ![6](imagenes/readme6.jpeg) |
-| ![7](imagenes/readme7.jpeg) | | |
+| ![1](assets/imagenes/readme1.jpeg) | ![2](assets/imagenes/readme2.jpeg) | ![3](assets/imagenes/readme3.jpeg) |
+| ![4](assets/imagenes/readme4.jpeg) | ![5](assets/imagenes/readme5.jpeg) | ![6](assets/imagenes/readme6.jpeg) |
+| ![7](assets/imagenes/readme7.jpeg) | ![8](assets/imagenes/readme8.jpeg) | ![9](assets/imagenes/readme9.jpeg) |
 
 ## Tech Stack
 
