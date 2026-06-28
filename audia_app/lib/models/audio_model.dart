@@ -1,6 +1,6 @@
 class AudioModel {
   final String id;
-  final String idCuentaDueno;
+  final String idPerfilDueno;
   final String nombreUsuario;
   final String? fotoPerfil;
   final String audioUrl;
@@ -12,7 +12,7 @@ class AudioModel {
 
   AudioModel({
     required this.id,
-    required this.idCuentaDueno,
+    required this.idPerfilDueno,
     required this.nombreUsuario,
     this.fotoPerfil,
     required this.audioUrl,
@@ -26,7 +26,7 @@ class AudioModel {
   factory AudioModel.fromJson(Map<String, dynamic> json) {
     return AudioModel(
       id: json['id'] as String,
-      idCuentaDueno: json['id_cuenta_dueno'] as String,
+      idPerfilDueno: json['id_perfil_dueno'] as String,
       nombreUsuario: json['nombre_usuario'] as String,
       fotoPerfil: json['foto_perfil'] as String?,
       audioUrl: json['audio_url'] as String,
@@ -40,7 +40,7 @@ class AudioModel {
 
   Map<String, dynamic> toJson() => {
     'id': id,
-    'id_cuenta_dueno': idCuentaDueno,
+    'id_perfil_dueno': idPerfilDueno,
     'nombre_usuario': nombreUsuario,
     'foto_perfil': fotoPerfil,
     'audio_url': audioUrl,
@@ -54,7 +54,7 @@ class AudioModel {
 
 class ComentarioModel {
   final String id;
-  final String idDuenoComentario;
+  final String idPerfilDuenoComentario;
   final String nombreUsuario;
   final String? fotoPerfil;
   final String texto;
@@ -63,7 +63,7 @@ class ComentarioModel {
 
   ComentarioModel({
     required this.id,
-    required this.idDuenoComentario,
+    required this.idPerfilDuenoComentario,
     required this.nombreUsuario,
     this.fotoPerfil,
     required this.texto,
@@ -74,7 +74,7 @@ class ComentarioModel {
   factory ComentarioModel.fromJson(Map<String, dynamic> json) {
     return ComentarioModel(
       id: json['id'] as String,
-      idDuenoComentario: json['id_dueno_comentario'] as String,
+      idPerfilDuenoComentario: json['id_perfil_dueno_comentario'] as String,
       nombreUsuario: json['nombre_usuario'] as String,
       fotoPerfil: json['foto_perfil'] as String?,
       texto: json['texto'] as String,

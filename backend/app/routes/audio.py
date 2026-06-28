@@ -34,19 +34,26 @@ def _get_duration(file_path: str) -> float:
             return 0.0
 
 
-def _get_user_info(db: Session, user_id: str) -> tuple[str, str | None]:
-    cuenta = db.query(Cuenta).filter(Cuenta.id == user_id).first()
-    if cuenta and cuenta.perfil:
-        return cuenta.perfil.nombre_usuario, cuenta.perfil.foto_perfil
+def _get_user_info_from_perfil(db: Session, perfil_id: str) -> tuple[str, str | None]:
+    perfil = db.query(Perfil).filter(Perfil.id == perfil_id).first()
+    if perfil:
+        return perfil.nombre_usuario, perfil.foto_perfil
     return "Usuario", None
 
 
-def _audio_to_response(audio: Audio, current_user_id: str, db: Session) -> AudioResponse:
-    username, foto = _get_user_info(db, audio.id_cuenta_dueno)
-    is_liked = current_user_id in (audio.lista_likes_cuentas or [])
+def _get_perfil_id(db: Session, account_id: str) -> str:
+    cuenta = db.query(Cuenta).filter(Cuenta.id == account_id).first()
+    if not cuenta or not cuenta.perfil:
+        raise HTTPException(status_code=404, detail="Perfil no encontrado")
+    return cuenta.perfil.id
+
+
+def _audio_to_response(audio: Audio, current_perfil_id: str, db: Session) -> AudioResponse:
+    username, foto = _get_user_info_from_perfil(db, audio.id_perfil_dueno)
+    is_liked = current_perfil_id in (audio.lista_likes_perfiles or [])
     return AudioResponse(
         id=audio.id,
-        id_cuenta_dueno=audio.id_cuenta_dueno,
+        id_perfil_dueno=audio.id_perfil_dueno,
         nombre_usuario=username,
         foto_perfil=foto,
         audio_url=audio.audio_url,
@@ -63,12 +70,11 @@ async def upload_audio(
     file: UploadFile = File(...),
     duracion: float = Form(...),
     foto_fondo: str | None = Form(None),
+    fondo_file: UploadFile | None = File(None),
     db: Session = Depends(get_db),
     account_id: str = Depends(get_current_account),
 ):
-    cuenta = db.query(Cuenta).filter(Cuenta.id == account_id).first()
-    if not cuenta:
-        raise HTTPException(status_code=404, detail="Cuenta no encontrada")
+    perfil_id = _get_perfil_id(db, account_id)
 
     suffix = os.path.splitext(file.filename or "audio.mp3")[1] or ".mp3"
     with tempfile.NamedTemporaryFile(delete=False, suffix=suffix, dir="temp") as tmp:
@@ -94,17 +100,39 @@ async def upload_audio(
     finally:
         os.unlink(tmp_path)
 
+    # Si se subió una imagen de fondo, súbela a Cloudinary
+    fondo_final = foto_fondo
+    if fondo_file:
+        suffix_img = os.path.splitext(fondo_file.filename or "fondo.jpg")[1] or ".jpg"
+        with tempfile.NamedTemporaryFile(delete=False, suffix=suffix_img, dir="temp") as tmp_img:
+            content_img = await fondo_file.read()
+            tmp_img.write(content_img)
+            tmp_img_path = tmp_img.name
+        try:
+            result_img = cloudinary.uploader.upload(
+                tmp_img_path,
+                resource_type="image",
+                folder="audia_fondos",
+                use_filename=True,
+                unique_filename=True,
+            )
+            fondo_final = result_img["secure_url"]
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=f"Error subiendo imagen de fondo: {str(e)}")
+        finally:
+            os.unlink(tmp_img_path)
+
     audio = Audio(
-        id_cuenta_dueno=account_id,
+        id_perfil_dueno=perfil_id,
         audio_url=audio_url,
         duracion=duracion,
-        foto_fondo=foto_fondo,
+        foto_fondo=fondo_final,
     )
     db.add(audio)
     db.commit()
     db.refresh(audio)
 
-    return _audio_to_response(audio, account_id, db)
+    return _audio_to_response(audio, perfil_id, db)
 
 
 @router.get("/", response_model=AudioListResponse)
@@ -112,10 +140,11 @@ def list_audios(
     db: Session = Depends(get_db),
     account_id: str = Depends(get_current_account),
 ):
+    perfil_id = _get_perfil_id(db, account_id)
     audios = db.query(Audio).order_by(Audio.id.desc()).all()
 
     return AudioListResponse(
-        audios=[_audio_to_response(a, account_id, db) for a in audios]
+        audios=[_audio_to_response(a, perfil_id, db) for a in audios]
     )
 
 
@@ -124,9 +153,10 @@ def mis_audios(
     db: Session = Depends(get_db),
     account_id: str = Depends(get_current_account),
 ):
-    audios = db.query(Audio).filter(Audio.id_cuenta_dueno == account_id).order_by(Audio.id.desc()).all()
+    perfil_id = _get_perfil_id(db, account_id)
+    audios = db.query(Audio).filter(Audio.id_perfil_dueno == perfil_id).order_by(Audio.id.desc()).all()
     return AudioListResponse(
-        audios=[_audio_to_response(a, account_id, db) for a in audios]
+        audios=[_audio_to_response(a, perfil_id, db) for a in audios]
     )
 
 
@@ -136,20 +166,21 @@ def toggle_like(
     db: Session = Depends(get_db),
     account_id: str = Depends(get_current_account),
 ):
+    perfil_id = _get_perfil_id(db, account_id)
     audio = db.query(Audio).filter(Audio.id == audio_id).first()
     if not audio:
         raise HTTPException(status_code=404, detail="Audio no encontrado")
 
-    if not audio.lista_likes_cuentas:
-        audio.lista_likes_cuentas = []
+    if not audio.lista_likes_perfiles:
+        audio.lista_likes_perfiles = []
 
-    if account_id in audio.lista_likes_cuentas:
-        audio.lista_likes_cuentas.remove(account_id)
+    if perfil_id in audio.lista_likes_perfiles:
+        audio.lista_likes_perfiles.remove(perfil_id)
         audio.num_likes = max(0, audio.num_likes - 1)
         db.commit()
         return {"liked": False, "num_likes": audio.num_likes}
     else:
-        audio.lista_likes_cuentas.append(account_id)
+        audio.lista_likes_perfiles.append(perfil_id)
         audio.num_likes += 1
         db.commit()
         return {"liked": True, "num_likes": audio.num_likes}
@@ -162,6 +193,7 @@ def add_comentario(
     db: Session = Depends(get_db),
     account_id: str = Depends(get_current_account),
 ):
+    perfil_id = _get_perfil_id(db, account_id)
     audio = db.query(Audio).filter(Audio.id == audio_id).first()
     if not audio:
         raise HTTPException(status_code=404, detail="Audio no encontrado")
@@ -170,7 +202,7 @@ def add_comentario(
         raise HTTPException(status_code=400, detail="El comentario no puede estar vacío")
 
     comentario = Comentario(
-        id_dueno_comentario=account_id,
+        id_perfil_dueno_comentario=perfil_id,
         id_audio=audio_id,
         texto=request.texto.strip(),
     )
@@ -179,10 +211,10 @@ def add_comentario(
     db.commit()
     db.refresh(comentario)
 
-    username, foto = _get_user_info(db, account_id)
+    username, foto = _get_user_info_from_perfil(db, perfil_id)
     return ComentarioResponse(
         id=comentario.id,
-        id_dueno_comentario=account_id,
+        id_perfil_dueno_comentario=perfil_id,
         nombre_usuario=username,
         foto_perfil=foto,
         texto=comentario.texto,
@@ -197,6 +229,7 @@ def list_comentarios(
     db: Session = Depends(get_db),
     account_id: str = Depends(get_current_account),
 ):
+    perfil_id = _get_perfil_id(db, account_id)
     audio = db.query(Audio).filter(Audio.id == audio_id).first()
     if not audio:
         raise HTTPException(status_code=404, detail="Audio no encontrado")
@@ -209,11 +242,11 @@ def list_comentarios(
     )
     result = []
     for c in comentarios:
-        username, foto = _get_user_info(db, c.id_dueno_comentario)
-        is_liked = account_id in (c.lista_likes_cuentas or [])
+        username, foto = _get_user_info_from_perfil(db, c.id_perfil_dueno_comentario)
+        is_liked = perfil_id in (c.lista_likes_perfiles or [])
         result.append(ComentarioResponse(
             id=c.id,
-            id_dueno_comentario=c.id_dueno_comentario,
+            id_perfil_dueno_comentario=c.id_perfil_dueno_comentario,
             nombre_usuario=username,
             foto_perfil=foto,
             texto=c.texto,
@@ -230,6 +263,7 @@ def toggle_comentario_like(
     db: Session = Depends(get_db),
     account_id: str = Depends(get_current_account),
 ):
+    perfil_id = _get_perfil_id(db, account_id)
     audio = db.query(Audio).filter(Audio.id == audio_id).first()
     if not audio:
         raise HTTPException(status_code=404, detail="Audio no encontrado")
@@ -240,16 +274,16 @@ def toggle_comentario_like(
     if not comentario:
         raise HTTPException(status_code=404, detail="Comentario no encontrado")
 
-    if not comentario.lista_likes_cuentas:
-        comentario.lista_likes_cuentas = []
+    if not comentario.lista_likes_perfiles:
+        comentario.lista_likes_perfiles = []
 
-    if account_id in comentario.lista_likes_cuentas:
-        comentario.lista_likes_cuentas.remove(account_id)
+    if perfil_id in comentario.lista_likes_perfiles:
+        comentario.lista_likes_perfiles.remove(perfil_id)
         comentario.num_likes = max(0, comentario.num_likes - 1)
         db.commit()
         return {"liked": False, "num_likes": comentario.num_likes}
     else:
-        comentario.lista_likes_cuentas.append(account_id)
+        comentario.lista_likes_perfiles.append(perfil_id)
         comentario.num_likes += 1
         db.commit()
         return {"liked": True, "num_likes": comentario.num_likes}

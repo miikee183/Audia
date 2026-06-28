@@ -10,7 +10,7 @@ from typing import Optional
 
 
 class PerfilBasico(BaseModel):
-    cuenta_id: str
+    perfil_id: str
     nombre_usuario: str
     foto_perfil: Optional[str] = None
 
@@ -49,8 +49,8 @@ def crear_perfil(request: PerfilRequest, db: Session = Depends(get_db)):
     return {"message": "Perfil creado con éxito", "id": perfil.id}
 
 
-class BatchCuentasRequest(BaseModel):
-    cuenta_ids: list[str]
+class BatchPerfilesRequest(BaseModel):
+    perfil_ids: list[str]
 
 
 class PerfilDetalle(BaseModel):
@@ -72,18 +72,17 @@ def obtener_detalle_perfil(
     )
 
 
-@router.post("/por-cuentas", response_model=list[PerfilBasico])
-def obtener_perfiles_por_cuentas(
-    request: BatchCuentasRequest,
+@router.post("/por-ids", response_model=list[PerfilBasico])
+def obtener_perfiles_por_ids(
+    request: BatchPerfilesRequest,
     db: Session = Depends(get_db),
 ):
-    cuentas = db.query(Cuenta).filter(Cuenta.id.in_(request.cuenta_ids)).all()
-    result = []
-    for c in cuentas:
-        if c.perfil:
-            result.append(PerfilBasico(
-                cuenta_id=c.id,
-                nombre_usuario=c.perfil.nombre_usuario,
-                foto_perfil=c.perfil.foto_perfil,
-            ))
-    return result
+    perfiles = db.query(Perfil).filter(Perfil.id.in_(request.perfil_ids)).all()
+    return [
+        PerfilBasico(
+            perfil_id=p.id,
+            nombre_usuario=p.nombre_usuario,
+            foto_perfil=p.foto_perfil,
+        )
+        for p in perfiles
+    ]

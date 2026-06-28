@@ -12,7 +12,7 @@ class AudioService {
     return list.map((j) => AudioModel.fromJson(j as Map<String, dynamic>)).toList();
   }
 
-  Future<AudioModel> uploadAudio(String filePath, double duracion, {String? fotoFondo}) async {
+  Future<AudioModel> uploadAudio(String filePath, double duracion, {String? fotoFondo, String? fondoImagePath}) async {
     final request = http.MultipartRequest('POST', Uri.parse('${ApiService.baseUrl}/audio/upload'));
     final token = ApiService.token;
     if (token != null) {
@@ -20,6 +20,7 @@ class AudioService {
     }
     request.fields['duracion'] = duracion.toString();
     if (fotoFondo != null) request.fields['foto_fondo'] = fotoFondo;
+    if (fondoImagePath != null) request.files.add(await http.MultipartFile.fromPath('fondo_file', fondoImagePath));
     request.files.add(await http.MultipartFile.fromPath('file', filePath));
 
     final streamedResponse = await request.send().timeout(const Duration(seconds: 60));
@@ -29,8 +30,12 @@ class AudioService {
       final body = jsonDecode(response.body) as Map<String, dynamic>;
       return AudioModel.fromJson(body);
     }
-    final error = jsonDecode(response.body);
-    throw Exception(error['detail'] ?? 'Error al subir audio');
+    try {
+      final error = jsonDecode(response.body) as Map<String, dynamic>;
+      throw Exception(error['detail'] ?? 'Error del servidor');
+    } catch (_) {
+      throw Exception('Error del servidor (${response.statusCode}): ${response.body.length > 200 ? response.body.substring(0, 200) : response.body}');
+    }
   }
 
   Future<Map<String, dynamic>> toggleLike(String audioId) async {

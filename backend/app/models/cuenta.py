@@ -21,9 +21,3 @@ class Cuenta(Base):
         back_populates="cuenta", uselist=False, single_parent=True,
         foreign_keys=[id_perfil],
     )
-    audios: Mapped[list["Audio"]] = relationship(
-        back_populates="dueno", cascade="all, delete-orphan"
-    )
-    comentarios: Mapped[list["Comentario"]] = relationship(
-        back_populates="dueno", cascade="all, delete-orphan"
-    )

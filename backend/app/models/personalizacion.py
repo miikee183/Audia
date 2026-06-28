@@ -24,4 +24,11 @@ class Perfil(Base):
     lista_seguidores: Mapped[list] = mapped_column(JSON, default=list)
     lista_siguiendo: Mapped[list] = mapped_column(JSON, default=list)
 
+    audios: Mapped[list["Audio"]] = relationship(
+        back_populates="dueno", cascade="all, delete-orphan"
+    )
+    comentarios: Mapped[list["Comentario"]] = relationship(
+        back_populates="dueno", cascade="all, delete-orphan"
+    )
+
     cuenta: Mapped["Cuenta"] = relationship(back_populates="perfil", uselist=False)

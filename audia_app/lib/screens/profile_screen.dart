@@ -62,8 +62,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
     setState(() => _loading = false);
   }
 
-  Future<void> _showLista(String titulo, List<String> cuentaIds) async {
-    if (cuentaIds.isEmpty) {
+  Future<void> _showLista(String titulo, List<String> perfilIds) async {
+    if (perfilIds.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('No hay $titulo')),
       );
@@ -72,7 +72,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
     List<PerfilBasico> perfiles;
     try {
-      perfiles = await _perfilService.obtenerPerfilesPorCuentas(cuentaIds);
+      perfiles = await _perfilService.obtenerPerfilesPorIds(perfilIds);
     } catch (_) {
       perfiles = [];
     }
@@ -268,14 +268,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 }
 
-Color _cardColorForDuration(double seconds) {
-  if (seconds < 10) return const Color(0xFF1B3D1B);
-  if (seconds < 15) return const Color(0xFF2D4D2D);
-  if (seconds < 25) return const Color(0xFF4A4A1A);
-  if (seconds < 45) return const Color(0xFF4D2E1A);
-  return const Color(0xFF4D1A1A);
-}
-
 class _ProfileAudioCard extends StatelessWidget {
   final AudioModel audio;
   final VoidCallback onPlayPause;
@@ -305,11 +297,7 @@ class _ProfileAudioCard extends StatelessWidget {
       child: Stack(
         children: [
           Positioned.fill(
-            child: Image.network(
-              'https://picsum.photos/seed/${audio.id}/400/300',
-              fit: BoxFit.cover,
-              errorBuilder: (_, __, ___) => Container(color: _cardColorForDuration(audio.duracion)),
-            ),
+            child: _ProfileAudioBackground(fotoFondo: audio.fotoFondo, audioId: audio.id),
           ),
           Positioned.fill(
             child: Container(
@@ -580,6 +568,34 @@ class _CommentsSheetState extends State<_CommentsSheet> {
           ],
         ),
       ),
+    );
+  }
+}
+
+class _ProfileAudioBackground extends StatelessWidget {
+  final String? fotoFondo;
+  final String audioId;
+
+  const _ProfileAudioBackground({required this.fotoFondo, required this.audioId});
+
+  @override
+  Widget build(BuildContext context) {
+    if (fotoFondo != null && fotoFondo!.startsWith('#')) {
+      final hex = fotoFondo!.replaceFirst('#', '');
+      final color = Color(int.parse('FF$hex', radix: 16));
+      return Container(color: color);
+    }
+    if (fotoFondo != null && (fotoFondo!.startsWith('http://') || fotoFondo!.startsWith('https://'))) {
+      return Image.network(
+        fotoFondo!,
+        fit: BoxFit.cover,
+        errorBuilder: (_, __, ___) => Container(color: const Color(0xFF1A1A2E)),
+      );
+    }
+    return Image.network(
+      'https://picsum.photos/seed/$audioId/400/300',
+      fit: BoxFit.cover,
+      errorBuilder: (_, __, ___) => Container(color: const Color(0xFF1A1A2E)),
     );
   }
 }

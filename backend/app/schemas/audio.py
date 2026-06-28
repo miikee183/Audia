@@ -4,7 +4,7 @@ from typing import Optional
 
 class AudioResponse(BaseModel):
     id: str
-    id_cuenta_dueno: str
+    id_perfil_dueno: str
     nombre_usuario: str
     foto_perfil: Optional[str] = None
     audio_url: str
@@ -28,7 +28,7 @@ class ComentarioCreate(BaseModel):
 
 class ComentarioResponse(BaseModel):
     id: str
-    id_dueno_comentario: str
+    id_perfil_dueno_comentario: str
     nombre_usuario: str
     foto_perfil: Optional[str] = None
     texto: str

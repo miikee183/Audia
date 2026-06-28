@@ -2,12 +2,9 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:provider/provider.dart';
 import 'package:record/record.dart';
-import 'package:file_picker/file_picker.dart';
 import '../theme/app_theme.dart';
-import '../services/audio_service.dart';
-import '../providers/audio_provider.dart';
+import 'publish_audio_screen.dart';
 
 const _maxDuration = 60;
 const _micSize = 120.0;
@@ -241,78 +238,16 @@ class _RecordScreenState extends State<RecordScreen> {
     });
   }
 
-  Future<void> _upload() async {
+  void _publish() {
     if (_recordedPath == null) return;
-    setState(() => _isUploading = true);
-    try {
-      final s = AudioService();
-      await s.uploadAudio(_recordedPath!, _recordedDuration ?? 0);
-      s.dispose();
-      if (mounted) {
-        _delete();
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Audio publicado con éxito')),
-        );
-        context.read<AudioProvider>().loadAudios();
-      }
-    } catch (e) {
-      if (mounted) {
-        setState(() => _isUploading = false);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e'), backgroundColor: Colors.red.shade800),
-        );
-      }
-    }
-  }
-
-  Future<void> _pickAudio() async {
-    final result = await FilePicker.platform.pickFiles(
-      type: FileType.audio,
-      allowMultiple: false,
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => PublishAudioScreen(
+          filePath: _recordedPath!,
+          duration: _recordedDuration ?? 0,
+        ),
+      ),
     );
-    if (result == null || result.files.isEmpty) return;
-    final file = result.files.first;
-    if (file.path == null) return;
-
-    final tempPlayer = AudioPlayer();
-    try {
-      await tempPlayer.setFilePath(file.path!);
-      await Future.delayed(const Duration(milliseconds: 200));
-      final dur = tempPlayer.duration;
-      if (dur != null && dur.inSeconds > _maxDuration) {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('El audio no puede superar 1 minuto')),
-          );
-        }
-        await tempPlayer.dispose();
-        return;
-      }
-    } catch (_) {}
-    await tempPlayer.dispose();
-
-    if (mounted) {
-      setState(() => _isUploading = true);
-      try {
-        final s = AudioService();
-        await s.uploadAudio(file.path!, 0);
-        s.dispose();
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Audio subido con éxito')),
-          );
-          context.read<AudioProvider>().loadAudios();
-        }
-      } catch (e) {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Error: $e'), backgroundColor: Colors.red.shade800),
-          );
-        }
-      } finally {
-        if (mounted) setState(() => _isUploading = false);
-      }
-    }
   }
 
   @override
@@ -336,27 +271,6 @@ class _RecordScreenState extends State<RecordScreen> {
               child: Stack(
               key: _stackKey,
               children: [
-
-                if (!_isRecording && !_hasRecording)
-                  Positioned(
-                    bottom: 24,
-                    left: 16,
-                    right: 16,
-                    child: SizedBox(
-                      width: double.infinity,
-                      child: ElevatedButton.icon(
-                        onPressed: _isUploading ? null : _pickAudio,
-                        icon: Icon(_isUploading ? Icons.hourglass_top : Icons.upload_file),
-                        label: Text(_isUploading ? 'Subiendo...' : 'Subir audio'),
-                        style: ElevatedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(vertical: 16),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(16),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
 
                 if (_showLock || _isLocked)
                   Positioned(
@@ -599,7 +513,7 @@ class _RecordScreenState extends State<RecordScreen> {
         SizedBox(
           width: double.infinity,
           child: ElevatedButton.icon(
-            onPressed: _isUploading ? null : _upload,
+            onPressed: _isUploading ? null : _publish,
             icon: _isUploading
                 ? const SizedBox(
                     width: 18, height: 18,
