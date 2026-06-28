@@ -1,4 +1,4 @@
-![Logo](assets/imagenes/Logo.jpeg)
+![Logo](audia_app/assets/images/Logo.png)
 
 # Audia
 
@@ -20,9 +20,9 @@ Audia es una plataforma social de audio que te permite grabar y compartir clips 
 
 | | | |
 |:---:|:---:|:---:|
-| ![1](assets/imagenes/readme1.jpeg) | ![2](assets/imagenes/readme2.jpeg) | ![3](assets/imagenes/readme3.jpeg) |
-| ![4](assets/imagenes/readme4.jpeg) | ![5](assets/imagenes/readme5.jpeg) | ![6](assets/imagenes/readme6.jpeg) |
-| ![7](assets/imagenes/readme7.jpeg) | ![8](assets/imagenes/readme8.jpeg) | ![9](assets/imagenes/readme9.jpeg) |
+| ![1](audia_app/assets/images/readme1.jpeg) | ![2](audia_app/assets/images/readme2.jpeg) | ![3](audia_app/assets/images/readme3.jpeg) |
+| ![4](audia_app/assets/images/readme4.jpeg) | ![5](audia_app/assets/images/readme5.jpeg) | ![6](audia_app/assets/images/readme6.jpeg) |
+| ![7](audia_app/assets/images/readme7.jpeg) | ![8](audia_app/assets/images/readme8.jpeg) | ![9](audia_app/assets/images/readme9.jpeg) |
 
 ## Tech Stack
 
