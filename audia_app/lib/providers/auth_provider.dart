@@ -133,7 +133,22 @@ class AuthProvider extends ChangeNotifier {
     );
     ApiService.setToken(token);
     try {
-      await _api.get('/auth/me');
+      final me = await _api.get('/auth/me');
+      final account = me['account'] as Map<String, dynamic>?;
+      if (account != null) {
+        final idPerfil = account['id_perfil'] as String?;
+        if (idPerfil != null && idPerfil != _user!.profileId) {
+          _user = AuthUser(
+            userId: _user!.userId,
+            email: _user!.email,
+            telefono: _user!.telefono,
+            tienePerfil: _user!.tienePerfil,
+            profileId: idPerfil,
+            accessToken: _user!.accessToken,
+          );
+          _saveSession();
+        }
+      }
       notifyListeners();
       return true;
     } catch (_) {

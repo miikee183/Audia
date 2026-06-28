@@ -8,6 +8,8 @@ from app.schemas.personalizacion import PerfilRequest
 from app.services.auth_service import get_current_account
 from typing import Optional
 
+MAX_SIGUIENDO = 3000
+
 
 class PerfilBasico(BaseModel):
     perfil_id: str
@@ -86,3 +88,60 @@ def obtener_perfiles_por_ids(
         )
         for p in perfiles
     ]
+
+
+class ToggleFollowResponse(BaseModel):
+    siguiendo: bool
+
+
+@router.post("/toggle-follow/{target_id}", response_model=ToggleFollowResponse)
+def toggle_follow(
+    target_id: str,
+    db: Session = Depends(get_db),
+    account_id: str = Depends(get_current_account),
+):
+    cuenta = db.query(Cuenta).filter(Cuenta.id == account_id).first()
+    if not cuenta or not cuenta.perfil:
+        raise HTTPException(status_code=404, detail="Perfil no encontrado")
+
+    target = db.query(Perfil).filter(Perfil.id == target_id).first()
+    if not target:
+        raise HTTPException(status_code=404, detail="Perfil objetivo no encontrado")
+
+    if target_id == cuenta.perfil.id:
+        raise HTTPException(status_code=400, detail="No puedes seguirte a ti mismo")
+
+    perfil = cuenta.perfil
+
+    if target_id in (perfil.lista_siguiendo or []):
+        new_siguiendo = list(perfil.lista_siguiendo or [])
+        new_siguiendo.remove(target_id)
+        perfil.lista_siguiendo = new_siguiendo
+        perfil.num_siguiendo = len(new_siguiendo)
+
+        seguidores_target = list(target.lista_seguidores or [])
+        seguidores_target.remove(perfil.id)
+        target.lista_seguidores = seguidores_target
+        target.num_seguidores = len(seguidores_target)
+
+        db.commit()
+        return ToggleFollowResponse(siguiendo=False)
+
+    if len(perfil.lista_siguiendo or []) >= MAX_SIGUIENDO:
+        raise HTTPException(
+            status_code=400,
+            detail=f"No puedes seguir a más de {MAX_SIGUIENDO} personas",
+        )
+
+    new_siguiendo = list(perfil.lista_siguiendo or [])
+    new_siguiendo.append(target_id)
+    perfil.lista_siguiendo = new_siguiendo
+    perfil.num_siguiendo = len(new_siguiendo)
+
+    seguidores_target = list(target.lista_seguidores or [])
+    seguidores_target.append(perfil.id)
+    target.lista_seguidores = seguidores_target
+    target.num_seguidores = len(seguidores_target)
+
+    db.commit()
+    return ToggleFollowResponse(siguiendo=True)

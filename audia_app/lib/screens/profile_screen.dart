@@ -8,6 +8,7 @@ import 'package:audia/models/perfil_model.dart';
 import 'package:audia/services/api_service.dart';
 import 'package:audia/services/perfil_service.dart';
 import 'package:audia/widgets/profile_image.dart';
+import 'package:audia/helpers/formatters.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -171,16 +172,16 @@ class ProfileScreenState extends State<ProfileScreen> {
               Expanded(
                 child: GestureDetector(
                   onTap: () => _showLista('Siguiendo', _listaSiguiendo),
-                  child: _Stat(count: '$_numSiguiendo', label: 'Siguiendo'),
+                  child: _Stat(count: formatCount(_numSiguiendo), label: 'Siguiendo'),
                 ),
               ),
               Expanded(
                 child: GestureDetector(
                   onTap: () => _showLista('Seguidores', _listaSeguidores),
-                  child: _Stat(count: '$_numSeguidores', label: 'Seguidores'),
+                  child: _Stat(count: formatCount(_numSeguidores), label: 'Seguidores'),
                 ),
               ),
-              Expanded(child: _Stat(count: '$_likesTotales', label: 'Likes')),
+              Expanded(child: _Stat(count: formatCount(_likesTotales), label: 'Likes')),
             ],
           ),
 

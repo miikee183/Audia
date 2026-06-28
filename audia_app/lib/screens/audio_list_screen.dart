@@ -5,6 +5,7 @@ import '../theme/app_theme.dart';
 import '../models/audio_model.dart';
 import '../providers/audio_provider.dart';
 import '../providers/auth_provider.dart';
+import '../services/perfil_service.dart';
 import '../widgets/profile_image.dart';
 
 class AudioListScreen extends StatefulWidget {
@@ -126,11 +127,24 @@ class _AudioGridState extends State<_AudioGrid> {
           ),
         )),
       ],
-    ).then((value) {
+    ).then((value) async {
       if (value == 'follow') {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Siguiendo a ${audio.nombreUsuario}'), backgroundColor: AppTheme.surfaceColor),
-        );
+        final perfilService = PerfilService();
+        try {
+          final siguiendo = await perfilService.toggleFollow(audio.idPerfilDueno);
+          if (!context.mounted) return;
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(siguiendo ? 'Siguiendo a ${audio.nombreUsuario}' : 'Dejaste de seguir a ${audio.nombreUsuario}'),
+              backgroundColor: AppTheme.surfaceColor,
+            ),
+          );
+        } catch (e) {
+          if (!context.mounted) return;
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Error: $e'), backgroundColor: Colors.red),
+          );
+        }
       } else if (value == 'profile') {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Perfil de ${audio.nombreUsuario}'), backgroundColor: AppTheme.surfaceColor),

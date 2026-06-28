@@ -12,4 +12,9 @@ class PerfilService {
     final list = response as List<dynamic>;
     return list.map((j) => PerfilBasico.fromJson(j as Map<String, dynamic>)).toList();
   }
+
+  Future<bool> toggleFollow(String targetId) async {
+    final response = await _api.post('/perfil/toggle-follow/$targetId', {});
+    return response['siguiendo'] as bool;
+  }
 }
