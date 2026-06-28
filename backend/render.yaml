@@ -16,6 +16,12 @@ services:
         sync: false
       - key: JWT_SECRET
         generateValue: true
+      - key: CLOUDINARY_CLOUD_NAME
+        value: dp6qubefo
+      - key: CLOUDINARY_API_KEY
+        value: 192724137726516
+      - key: CLOUDINARY_API_SECRET
+        value: denL4Ha9JPHuJPG-sZ0_dFW33c8
 
 databases:
   - name: audia-db
