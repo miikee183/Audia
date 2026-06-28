@@ -1,8 +1,8 @@
-<img src="audia_app/assets/images/Logo.png" width="150">
-
 # Audia
 
 Audia es una plataforma social de audio que te permite grabar y compartir clips de voz cortos (hasta 60 segundos) con tus amigos y seguidores. Es como una red social basada en voz: graba, publica, da like y comenta en publicaciones de audio.
+
+<img src="audia_app/assets/images/Logo.png" width="150">
 
 ## Funcionalidades
 
