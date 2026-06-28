@@ -20,9 +20,9 @@ Audia es una plataforma social de audio que te permite grabar y compartir clips 
 
 | | | |
 |:---:|:---:|:---:|
-| ![1](audia_app/assets/images/readme1.jpeg) | ![2](audia_app/assets/images/readme2.jpeg) | ![3](audia_app/assets/images/readme3.jpeg) |
-| ![4](audia_app/assets/images/readme4.jpeg) | ![5](audia_app/assets/images/readme5.jpeg) | ![6](audia_app/assets/images/readme6.jpeg) |
-| ![7](audia_app/assets/images/readme7.jpeg) | ![8](audia_app/assets/images/readme8.jpeg) | ![9](audia_app/assets/images/readme9.jpeg) |
+| <img src="audia_app/assets/images/readme1.jpeg" width="200"> | <img src="audia_app/assets/images/readme2.jpeg" width="200"> | <img src="audia_app/assets/images/readme3.jpeg" width="200"> |
+| <img src="audia_app/assets/images/readme4.jpeg" width="200"> | <img src="audia_app/assets/images/readme5.jpeg" width="200"> | <img src="audia_app/assets/images/readme6.jpeg" width="200"> |
+| <img src="audia_app/assets/images/readme7.jpeg" width="200"> | <img src="audia_app/assets/images/readme8.jpeg" width="200"> | <img src="audia_app/assets/images/readme9.jpeg" width="200"> |
 
 ## Tech Stack
 
