@@ -1,4 +1,4 @@
-![Logo](audia_app/assets/images/Logo.png)
+<img src="audia_app/assets/images/Logo.png" width="150">
 
 # Audia
 
