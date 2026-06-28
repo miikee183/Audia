@@ -1,10 +1,20 @@
+from sqlalchemy import inspect, text
 from app.database.database import Base, engine
 
 
-def drop_tables():
-    """Drop audios and comentarios so they get recreated with the new schema."""
+def reset_all_tables():
+    """Drop entire public schema and recreate all tables (one-time migration)."""
+    # Only run if old schema is detected
+    inspector = inspect(engine)
+    try:
+        columns = [c["name"] for c in inspector.get_columns("audios")]
+        if "id_perfil_dueno" in columns:
+            return  # already migrated
+    except Exception:
+        pass  # table might not exist yet
+
     with engine.connect() as conn:
-        conn.exec_driver_sql('DROP TABLE IF EXISTS "comentarios" CASCADE')
-        conn.exec_driver_sql('DROP TABLE IF EXISTS "audios" CASCADE')
+        conn.execute(text("DROP SCHEMA public CASCADE"))
+        conn.execute(text("CREATE SCHEMA public"))
         conn.commit()
     Base.metadata.create_all(bind=engine)

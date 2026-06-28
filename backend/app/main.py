@@ -1,12 +1,11 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.database.database import Base, engine
-from app.database.migrate import drop_tables
+from app.database.migrate import reset_all_tables
 from app.routes.auth import router as auth_router
 from app.routes.personalizacion import router as personalizacion_router
 from app.routes.audio import router as audio_router
 
-drop_tables()
+reset_all_tables()
 
 app = FastAPI(title="Audia API", version="0.1.0")
 
