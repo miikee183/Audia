@@ -1,3 +1,5 @@
+EN PLENO DESARROLLO
+
 # Audia
 
 Audia es una plataforma social de audio que te permite grabar y compartir clips de voz cortos (hasta 60 segundos) con tus amigos y seguidores. Es como una red social basada en voz: graba, publica, da like y comenta en publicaciones de audio.
@@ -16,14 +18,6 @@ Audia es una plataforma social de audio que te permite grabar y compartir clips 
 - **Bandeja de Entrada** — Mira notificaciones de likes, comentarios y nuevos seguidores
 - **Perfil** — Personaliza tu foto, nombre de usuario y biografía; revisa tu historial de audios
 
-## Capturas de Pantalla
-
-| | | |
-|:---:|:---:|:---:|
-| <img src="audia_app/assets/images/readme1.jpeg" width="200"> | <img src="audia_app/assets/images/readme2.jpeg" width="200"> | <img src="audia_app/assets/images/readme3.jpeg" width="200"> |
-| <img src="audia_app/assets/images/readme4.jpeg" width="200"> | <img src="audia_app/assets/images/readme5.jpeg" width="200"> | <img src="audia_app/assets/images/readme6.jpeg" width="200"> |
-| <img src="audia_app/assets/images/readme7.jpeg" width="200"> | <img src="audia_app/assets/images/readme8.jpeg" width="200"> | <img src="audia_app/assets/images/readme9.jpeg" width="200"> |
-
 ## Tech Stack
 
 - **Frontend:** Flutter / Dart
@@ -32,3 +26,11 @@ Audia es una plataforma social de audio que te permite grabar y compartir clips 
 - **Autenticación:** Google Sign-In (Firebase Auth)
 - **Almacenamiento Multimedia:** Cloudinary
 - **Despliegue:** Render (backend), Google Play (frontend — próximamente)
+
+## Capturas de Pantalla
+
+| | | |
+|:---:|:---:|:---:|
+| <img src="audia_app/assets/images/readme1.jpeg" width="200"> | <img src="audia_app/assets/images/readme2.jpeg" width="200"> | <img src="audia_app/assets/images/readme3.jpeg" width="200"> |
+| <img src="audia_app/assets/images/readme4.jpeg" width="200"> | <img src="audia_app/assets/images/readme5.jpeg" width="200"> | <img src="audia_app/assets/images/readme6.jpeg" width="200"> |
+| <img src="audia_app/assets/images/readme7.jpeg" width="200"> | <img src="audia_app/assets/images/readme8.jpeg" width="200"> | <img src="audia_app/assets/images/readme9.jpeg" width="200"> |
