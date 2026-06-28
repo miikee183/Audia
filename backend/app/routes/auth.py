@@ -32,6 +32,8 @@ def _cuenta_to_response(cuenta: Cuenta) -> AuthResponse:
         account_data["num_seguidores"] = cuenta.perfil.num_seguidores
         account_data["num_siguiendo"] = cuenta.perfil.num_siguiendo
         account_data["likes_totales"] = cuenta.perfil.likes_totales
+        account_data["cuenta_privada"] = cuenta.perfil.cuenta_privada
+        account_data["lista_bloqueados"] = cuenta.perfil.lista_bloqueados or []
     return AuthResponse(
         access_token=access_token,
         token_type="bearer",

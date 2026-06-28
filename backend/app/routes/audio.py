@@ -135,6 +135,34 @@ async def upload_audio(
     return _audio_to_response(audio, perfil_id, db)
 
 
+def _can_view_audio(perfil_id: str, owner_id: str, db: Session) -> bool:
+    """Check if perfil_id can view audios from owner_id."""
+    owner = db.query(Perfil).filter(Perfil.id == owner_id).first()
+    if not owner:
+        return False
+
+    # Check if owner blocked the current user
+    if perfil_id in (owner.lista_bloqueados or []):
+        return False
+
+    # Check if current user blocked the owner
+    current = db.query(Perfil).filter(Perfil.id == perfil_id).first()
+    if current and owner_id in (current.lista_bloqueados or []):
+        return False
+
+    # If owner has private account, only show to mutual followers (amigos)
+    if owner.cuenta_privada:
+        if perfil_id == owner_id:
+            return True
+        seguidores_owner = set(owner.lista_seguidores or [])
+        siguiendo_owner = set(owner.lista_siguiendo or [])
+        if perfil_id in seguidores_owner and perfil_id in siguiendo_owner:
+            return True
+        return False
+
+    return True
+
+
 @router.get("/", response_model=AudioListResponse)
 def list_audios(
     db: Session = Depends(get_db),
@@ -143,8 +171,10 @@ def list_audios(
     perfil_id = _get_perfil_id(db, account_id)
     audios = db.query(Audio).order_by(Audio.id.desc()).all()
 
+    filtered = [a for a in audios if _can_view_audio(perfil_id, a.id_perfil_dueno, db)]
+
     return AudioListResponse(
-        audios=[_audio_to_response(a, perfil_id, db) for a in audios]
+        audios=[_audio_to_response(a, perfil_id, db) for a in filtered]
     )
 
 

@@ -7,6 +7,7 @@ import '../theme/app_theme.dart';
 import '../app_router.dart';
 import '../widgets/app_header.dart';
 import '../providers/auth_provider.dart';
+import '../l10n/app_strings.dart';
 
 class LoginScreen extends StatefulWidget {
   final String? telefono;
@@ -147,7 +148,7 @@ class _GoogleLoginButton extends StatelessWidget {
                 ),
               ),
         label: Text(
-          isLoading ? 'Conectando...' : 'Continuar con Google',
+          isLoading ? AppStrings.connecting : AppStrings.signInGoogle,
           style: const TextStyle(
             fontSize: 16,
             color: Colors.white,
@@ -176,7 +177,7 @@ class _DividerWithText extends StatelessWidget {
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16),
           child: Text(
-            'o con correo',
+            AppStrings.orWithEmail,
             style: TextStyle(color: Colors.white.withAlpha(120), fontSize: 14),
           ),
         ),
@@ -197,14 +198,14 @@ class _EmailField extends StatelessWidget {
       controller: controller,
       keyboardType: TextInputType.emailAddress,
       validator: (value) {
-        if (value == null || value.isEmpty) return 'Ingresa tu correo';
+        if (value == null || value.isEmpty) return AppStrings.enterEmail;
         final emailRegex = RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$');
-        if (!emailRegex.hasMatch(value)) return 'Correo inválido';
+        if (!emailRegex.hasMatch(value)) return AppStrings.invalidEmail;
         return null;
       },
-      decoration: const InputDecoration(
-        labelText: 'Correo electrónico',
-        prefixIcon: Icon(Icons.email_outlined, color: AppTheme.primaryColor),
+      decoration: InputDecoration(
+        labelText: AppStrings.emailLabel,
+        prefixIcon: const Icon(Icons.email_outlined, color: AppTheme.primaryColor),
       ),
     );
   }
@@ -227,12 +228,12 @@ class _PasswordField extends StatelessWidget {
       controller: controller,
       obscureText: obscure,
       validator: (value) {
-        if (value == null || value.isEmpty) return 'Ingresa tu contraseña';
-        if (value.length < 6) return 'Mínimo 6 caracteres';
+        if (value == null || value.isEmpty) return AppStrings.enterPassword;
+        if (value.length < 6) return AppStrings.minChars;
         return null;
       },
       decoration: InputDecoration(
-        labelText: 'Contraseña',
+        labelText: AppStrings.passwordLabel,
         prefixIcon: const Icon(Icons.lock_outline, color: AppTheme.primaryColor),
         suffixIcon: IconButton(
           icon: Icon(
@@ -253,7 +254,7 @@ class _ForgotPasswordButton extends StatelessWidget {
       alignment: Alignment.centerRight,
       child: TextButton(
         onPressed: () {},
-        child: const Text('¿Has olvidado tu contraseña?'),
+        child: Text(AppStrings.forgotPassword),
       ),
     );
   }
@@ -271,7 +272,7 @@ class _LoginButton extends StatelessWidget {
       onPressed: isLoading ? null : onPressed,
       child: isLoading
           ? const SizedBox(width: 24, height: 24, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.black))
-          : const Text('Iniciar sesión'),
+          : Text(AppStrings.logIn),
     );
   }
 }
@@ -287,7 +288,7 @@ class _RegisterLink extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         Text(
-          '¿No tienes cuenta? ',
+          AppStrings.noAccount,
           style: TextStyle(color: Colors.white.withAlpha(180)),
         ),
         TextButton(
@@ -298,7 +299,7 @@ class _RegisterLink extends StatelessWidget {
               context.push(AppRouter.signUp);
             }
           },
-          child: const Text('Regístrate'),
+          child: Text(AppStrings.signUp),
         ),
       ],
     );

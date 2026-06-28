@@ -1,5 +1,6 @@
 ﻿import 'package:flutter/material.dart';
 import '../theme/app_theme.dart';
+import '../l10n/app_strings.dart';
 
 class InboxScreen extends StatelessWidget {
   const InboxScreen({super.key});
@@ -8,7 +9,7 @@ class InboxScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Bandeja de entrada', style: TextStyle(fontWeight: FontWeight.bold)),
+        title: Text(AppStrings.inboxFull, style: const TextStyle(fontWeight: FontWeight.bold)),
         centerTitle: true,
       ),
       body: ListView(
@@ -17,26 +18,26 @@ class InboxScreen extends StatelessWidget {
           _NotificationItem(
             icon: Icons.favorite,
             color: Colors.red,
-            text: 'A usuario_123 le gustó tu audio',
-            time: 'hace 2m',
+            text: AppStrings.notificationLikedAudio.replaceFirst('{user}', 'usuario_123'),
+            time: AppStrings.timeAgoMinFormat.replaceFirst('{n}', '2'),
           ),
           _NotificationItem(
             icon: Icons.chat,
             color: AppTheme.primaryColor,
-            text: 'usuario_456 comentó: "Muy bueno!"',
-            time: 'hace 15m',
+            text: AppStrings.notificationCommented.replaceFirst('{user}', 'usuario_456').replaceFirst('{comment}', '"Muy bueno!"'),
+            time: AppStrings.timeAgoMinFormat.replaceFirst('{n}', '15'),
           ),
           _NotificationItem(
             icon: Icons.person_add,
             color: Colors.green,
-            text: 'usuario_789 empezó a seguirte',
-            time: 'hace 1h',
+            text: AppStrings.notificationStartedFollowing.replaceFirst('{user}', 'usuario_789'),
+            time: AppStrings.timeAgoHourFormat.replaceFirst('{n}', '1'),
           ),
           _NotificationItem(
             icon: Icons.favorite,
             color: Colors.red,
-            text: 'A usuario_321 le gustó tu audio',
-            time: 'hace 3h',
+            text: AppStrings.notificationLikedAudio.replaceFirst('{user}', 'usuario_321'),
+            time: AppStrings.timeAgoHourFormat.replaceFirst('{n}', '3'),
           ),
         ],
       ),

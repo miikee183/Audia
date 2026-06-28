@@ -4,6 +4,7 @@ import 'package:just_audio/just_audio.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:record/record.dart';
 import '../theme/app_theme.dart';
+import '../l10n/app_strings.dart';
 import 'publish_audio_screen.dart';
 
 const _maxDuration = 60;
@@ -98,7 +99,7 @@ class _RecordScreenState extends State<RecordScreen> {
     if (!_permissionGranted) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Permiso de micrófono requerido')),
+          SnackBar(content: Text(AppStrings.micPermission)),
         );
       }
       return;
@@ -254,7 +255,7 @@ class _RecordScreenState extends State<RecordScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Grabar', style: TextStyle(fontWeight: FontWeight.bold)),
+        title: Text(AppStrings.record, style: const TextStyle(fontWeight: FontWeight.bold)),
         centerTitle: true,
       ),
       body: SafeArea(
@@ -370,10 +371,10 @@ class _RecordScreenState extends State<RecordScreen> {
                   child: Center(
                     child: Text(
                       _hasRecording
-                          ? 'Grabación lista'
+                          ? AppStrings.recordingReady
                           : _isRecording
-                              ? (_isLocked ? 'Bloqueado - pulsa ✓ para terminar' : 'Desliza arriba para bloquear')
-                              : 'Mantén para grabar',
+                              ? (_isLocked ? AppStrings.lockedTapCheck : AppStrings.swipeUpToLock)
+                              : AppStrings.holdToRecord,
                       style: const TextStyle(color: Colors.white54, fontSize: 16),
                     ),
                   ),
@@ -520,7 +521,7 @@ class _RecordScreenState extends State<RecordScreen> {
                     child: CircularProgressIndicator(strokeWidth: 2, color: Colors.black),
                   )
                 : const Icon(Icons.cloud_upload, size: 20),
-            label: Text(_isUploading ? 'Publicando...' : 'Publicar audio'),
+            label: Text(_isUploading ? AppStrings.publishing : AppStrings.publishAudio),
             style: ElevatedButton.styleFrom(
               padding: const EdgeInsets.symmetric(vertical: 16),
             ),

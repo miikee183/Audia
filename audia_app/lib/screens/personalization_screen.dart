@@ -9,6 +9,7 @@ import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../providers/auth_provider.dart';
 import '../services/api_service.dart';
+import '../l10n/app_strings.dart';
 import '../app_router.dart';
 import '../theme/app_theme.dart';
 
@@ -51,13 +52,13 @@ class _PersonalizationScreenState extends State<PersonalizationScreen> {
     '日本語': '日本語',
   };
 
-  final List<String> _stepTitles = [
-    'Fecha de nacimiento',
-    'Sexo',
-    'Nombre de Usuario',
-    'Biografía',
-    'Foto de perfil',
-    'Idioma',
+  List<String> _stepTitles() => [
+    AppStrings.birthDate,
+    AppStrings.genderSelect,
+    AppStrings.chooseUsername,
+    AppStrings.bio,
+    AppStrings.profilePhoto,
+    AppStrings.language,
   ];
 
   @override
@@ -88,12 +89,12 @@ class _PersonalizationScreenState extends State<PersonalizationScreen> {
   void _nextStep() {
     if (!_isCurrentStepValid()) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Por favor completa este paso')),
+        SnackBar(content: Text(AppStrings.completeStepPrompt)),
       );
       return;
     }
     FocusScope.of(context).unfocus();
-    if (_currentStep < _stepTitles.length - 1) {
+      if (_currentStep < _stepTitles().length - 1) {
       _pageController.nextPage(
         duration: const Duration(milliseconds: 300),
         curve: Curves.easeInOut,
@@ -152,15 +153,7 @@ class _PersonalizationScreenState extends State<PersonalizationScreen> {
   }
 
   String _stepQuestion(int step) {
-    const questions = [
-      '¿Cuándo naciste?',
-      '¿Cuál es tu sexo?',
-      'Elige un nombre de usuario',
-      'Biografía',
-      'Foto de perfil',
-      'Idioma',
-    ];
-    return questions[step];
+    return _stepTitles()[step];
   }
 
   void _showDatePicker() {
@@ -180,14 +173,14 @@ class _PersonalizationScreenState extends State<PersonalizationScreen> {
                 children: [
                   TextButton(
                     onPressed: () => Navigator.pop(context),
-                    child: const Text('Cancelar', style: TextStyle(color: Colors.white60)),
+                    child: Text(AppStrings.cancel, style: const TextStyle(color: Colors.white60)),
                   ),
                   TextButton(
                     onPressed: () {
                       Navigator.pop(context);
                       setState(() {});
                     },
-                    child: const Text('Listo', style: TextStyle(color: AppTheme.primaryColor, fontWeight: FontWeight.bold)),
+                    child: Text(AppStrings.done, style: const TextStyle(color: AppTheme.primaryColor, fontWeight: FontWeight.bold)),
                   ),
                 ],
               ),
@@ -238,14 +231,14 @@ class _PersonalizationScreenState extends State<PersonalizationScreen> {
                     child: Column(
                       children: [
                         Text(
-                          'Paso ${_currentStep + 1} de ${_stepTitles.length}',
+                          AppStrings.stepOf.replaceFirst('{current}', '${_currentStep + 1}').replaceFirst('{total}', '${_stepTitles().length}'),
                           style: TextStyle(color: Colors.white.withAlpha(180), fontSize: 14),
                         ),
                         const SizedBox(height: 12),
                         ClipRRect(
                           borderRadius: BorderRadius.circular(4),
                           child: LinearProgressIndicator(
-                            value: (_currentStep + 1) / _stepTitles.length,
+                            value: (_currentStep + 1) / _stepTitles().length,
                             backgroundColor: Colors.white.withAlpha(30),
                             valueColor: const AlwaysStoppedAnimation<Color>(Color(0xFF6C63FF)),
                             minHeight: 6,
@@ -285,7 +278,7 @@ class _PersonalizationScreenState extends State<PersonalizationScreen> {
                                 sourcePath: picked.path,
                                 uiSettings: [
                                   AndroidUiSettings(
-                                    toolbarTitle: 'Ajustar foto',
+                                    toolbarTitle: AppStrings.adjustPhoto,
                                     toolbarColor: const Color(0xFF1A1A1A),
                                     toolbarWidgetColor: Colors.white,
                                     backgroundColor: Colors.black,
@@ -308,7 +301,7 @@ class _PersonalizationScreenState extends State<PersonalizationScreen> {
                                 sourcePath: picked.path,
                                 uiSettings: [
                                   AndroidUiSettings(
-                                    toolbarTitle: 'Ajustar foto',
+                                    toolbarTitle: AppStrings.adjustPhoto,
                                     toolbarColor: const Color(0xFF1A1A1A),
                                     toolbarWidgetColor: Colors.white,
                                     backgroundColor: Colors.black,
@@ -343,7 +336,7 @@ class _PersonalizationScreenState extends State<PersonalizationScreen> {
                                 padding: const EdgeInsets.symmetric(vertical: 16),
                                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                               ),
-                              child: const Text('Atrás', style: TextStyle(color: Colors.white, fontSize: 16)),
+                              child: Text(AppStrings.back, style: const TextStyle(color: Colors.white, fontSize: 16)),
                             ),
                           ),
                         if (_currentStep > 0) const SizedBox(width: 16),
@@ -357,7 +350,7 @@ class _PersonalizationScreenState extends State<PersonalizationScreen> {
                               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                             ),
                             child: Text(
-                              _currentStep == _stepTitles.length - 1 ? 'Listo' : 'Siguiente',
+                              _currentStep == _stepTitles().length - 1 ? AppStrings.done : AppStrings.next,
                               style: TextStyle(
                                 fontSize: 16,
                                 color: _isCurrentStepValid() ? Colors.black : Colors.white38,
@@ -516,7 +509,7 @@ class _UsernameStepState extends State<_UsernameStep> {
             textAlign: TextAlign.center,
             style: const TextStyle(fontSize: 28, color: Colors.white),
             decoration: InputDecoration(
-              hintText: 'usuario',
+              hintText: AppStrings.username.toLowerCase(),
               hintStyle: TextStyle(color: Colors.white.withAlpha(80), fontSize: 28),
               border: InputBorder.none,
             ),
@@ -583,7 +576,7 @@ class _BioStepState extends State<_BioStep> {
             textAlign: TextAlign.center,
             style: const TextStyle(fontSize: 20, color: Colors.white),
             decoration: InputDecoration(
-              hintText: 'Biografía...',
+              hintText: AppStrings.bio,
               hintStyle: TextStyle(color: Colors.white.withAlpha(80), fontSize: 20),
               border: InputBorder.none,
             ),
@@ -654,7 +647,7 @@ class _PhotoStep extends StatelessWidget {
               TextButton.icon(
                 onPressed: onRemove,
                 icon: const Icon(Icons.delete_outline, color: Colors.redAccent),
-                label: const Text('Eliminar foto', style: TextStyle(color: Colors.redAccent)),
+                label: Text(AppStrings.deletePhoto, style: const TextStyle(color: Colors.redAccent)),
               ),
             const SizedBox(height: 24),
             SizedBox(
@@ -662,7 +655,7 @@ class _PhotoStep extends StatelessWidget {
               child: OutlinedButton.icon(
                 onPressed: onPickCamera,
                 icon: const Icon(Icons.camera_alt_outlined),
-                label: const Text('Tomar foto'),
+                label: Text(AppStrings.takePhoto),
                 style: OutlinedButton.styleFrom(
                   side: BorderSide(color: Colors.white.withAlpha(60)),
                   padding: const EdgeInsets.symmetric(vertical: 16),
@@ -708,7 +701,7 @@ class _LanguageStep extends StatelessWidget {
                       Padding(
                         padding: const EdgeInsets.all(16),
                         child: Text(
-                          'Elige un idioma',
+                          AppStrings.chooseLanguage,
                           style: const TextStyle(color: Colors.white, fontSize: 16),
                         ),
                       ),
@@ -752,7 +745,7 @@ class _LanguageStep extends StatelessWidget {
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
               ),
               child: Text(
-                value ?? 'Elige idioma',
+                value ?? AppStrings.chooseLanguage,
                 style: TextStyle(
                   fontSize: 18,
                   color: value != null ? AppTheme.primaryColor : Colors.white60,

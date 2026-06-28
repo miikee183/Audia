@@ -7,11 +7,11 @@ def reset_all_tables(force: bool = False):
     if not force:
         inspector = inspect(engine)
         try:
-            columns = [c["name"] for c in inspector.get_columns("audios")]
-            if "id_perfil_dueno" in columns:
+            columns = [c["name"] for c in inspector.get_columns("perfiles")]
+            if "cuenta_privada" in columns and "lista_bloqueados" in columns:
                 return  # already migrated
         except Exception:
-            pass  # table might not exist yet
+            pass
 
     with engine.connect() as conn:
         conn.execute(text("DROP SCHEMA public CASCADE"))

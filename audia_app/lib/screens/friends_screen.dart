@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../theme/app_theme.dart';
+import '../l10n/app_strings.dart';
 
 class FriendsScreen extends StatelessWidget {
   const FriendsScreen({super.key});
@@ -8,7 +9,7 @@ class FriendsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Amigos', style: TextStyle(fontWeight: FontWeight.bold)),
+        title: Text(AppStrings.friends, style: const TextStyle(fontWeight: FontWeight.bold)),
         centerTitle: true,
       ),
       body: ListView(
@@ -24,8 +25,8 @@ class FriendsScreen extends StatelessWidget {
                 backgroundColor: AppTheme.primaryColor.withAlpha(60),
                 child: const Icon(Icons.person, color: Colors.white70),
               ),
-              title: Text('Amigo ${i + 1}', style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600)),
-              subtitle: const Text('Último mensaje...', style: TextStyle(color: Colors.white38, fontSize: 12)),
+              title: Text(AppStrings.friendN.replaceFirst('{n}', '${i + 1}'), style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600)),
+              subtitle: Text(AppStrings.lastMessage, style: const TextStyle(color: Colors.white38, fontSize: 12)),
               trailing: const Icon(Icons.chevron_right, color: Colors.white38),
               onTap: () {},
             ),

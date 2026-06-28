@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:audia/theme/app_theme.dart';
+import 'package:audia/l10n/app_strings.dart';
 import 'package:audia/services/api_service.dart';
 import 'package:audia/widgets/profile_image.dart';
 
@@ -91,7 +92,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       backgroundColor: Colors.black,
       appBar: AppBar(
         backgroundColor: Colors.black,
-        title: const Text('Editar perfil', style: TextStyle(fontWeight: FontWeight.bold)),
+        title: Text(AppStrings.editProfile, style: const TextStyle(fontWeight: FontWeight.bold)),
         centerTitle: true,
         leading: const SizedBox(),
         actions: [
@@ -134,8 +135,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
           const SizedBox(height: 32),
           TextField(
             controller: _usernameController,
-            decoration: const InputDecoration(
-              labelText: 'Nombre de usuario',
+            decoration: InputDecoration(
+              labelText: AppStrings.username,
             ),
             style: const TextStyle(color: Colors.white),
             maxLength: 30,
@@ -143,8 +144,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
           const SizedBox(height: 16),
           TextField(
             controller: _bioController,
-            decoration: const InputDecoration(
-              labelText: 'Biografía',
+            decoration: InputDecoration(
+              labelText: AppStrings.bio,
               alignLabelWithHint: true,
             ),
             style: const TextStyle(color: Colors.white),
@@ -158,7 +159,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
               onPressed: _saving ? null : _save,
               child: _saving
                   ? const SizedBox(width: 24, height: 24, child: CircularProgressIndicator(strokeWidth: 2))
-                  : const Text('Guardar cambios'),
+                  : Text(AppStrings.saveChanges),
             ),
           ),
         ],

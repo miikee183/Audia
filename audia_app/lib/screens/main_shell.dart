@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../theme/app_theme.dart';
+import '../l10n/app_strings.dart';
 import '../providers/audio_provider.dart';
 import '../widgets/playback_bar.dart';
 import 'audio_list_screen.dart';
@@ -88,12 +89,12 @@ class _MainShellState extends State<MainShell> {
         selectedItemColor: AppTheme.primaryColor,
         unselectedItemColor: Colors.white38,
         type: BottomNavigationBarType.fixed,
-        items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.home_outlined), activeIcon: Icon(Icons.home), label: 'Inicio'),
-          BottomNavigationBarItem(icon: Icon(Icons.inbox_outlined), activeIcon: Icon(Icons.inbox), label: 'Bandeja'),
-          BottomNavigationBarItem(icon: Icon(Icons.mic, size: 32), label: ''),
-          BottomNavigationBarItem(icon: Icon(Icons.people_outline), activeIcon: Icon(Icons.people), label: 'Amigos'),
-          BottomNavigationBarItem(icon: Icon(Icons.person_outline), activeIcon: Icon(Icons.person), label: 'Perfil'),
+        items: [
+          BottomNavigationBarItem(icon: const Icon(Icons.home_outlined), activeIcon: const Icon(Icons.home), label: AppStrings.home),
+          BottomNavigationBarItem(icon: const Icon(Icons.inbox_outlined), activeIcon: const Icon(Icons.inbox), label: AppStrings.inbox),
+          const BottomNavigationBarItem(icon: Icon(Icons.mic, size: 32), label: ''),
+          BottomNavigationBarItem(icon: const Icon(Icons.people_outline), activeIcon: const Icon(Icons.people), label: AppStrings.friends),
+          BottomNavigationBarItem(icon: const Icon(Icons.person_outline), activeIcon: const Icon(Icons.person), label: AppStrings.profile),
         ],
       ),
     );

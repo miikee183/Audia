@@ -5,6 +5,7 @@ import '../theme/app_theme.dart';
 import '../models/country_code.dart';
 import '../app_router.dart';
 import '../widgets/app_header.dart';
+import '../l10n/app_strings.dart';
 
 class PhoneScreen extends StatefulWidget {
   const PhoneScreen({super.key});
@@ -42,12 +43,12 @@ class _PhoneScreenState extends State<PhoneScreen> {
         await showDialog(
           context: context,
           builder: (ctx) => AlertDialog(
-            title: const Text('Código de verificación'),
-            content: Text('Tu código es: $devCodigo'),
+            title: Text(AppStrings.verificationCode),
+            content: Text('${AppStrings.yourCodeIs}$devCodigo'),
             actions: [
               TextButton(
                 onPressed: () => Navigator.of(ctx).pop(),
-                child: const Text('OK'),
+                child: Text(AppStrings.ok),
               ),
             ],
           ),
@@ -163,12 +164,12 @@ class _PhoneField extends StatelessWidget {
             controller: controller,
             keyboardType: TextInputType.phone,
             validator: (value) {
-              if (value == null || value.isEmpty) return 'Ingresa tu número';
-              if (value.length < 7) return 'Número inválido';
+              if (value == null || value.isEmpty) return AppStrings.enterNumber;
+              if (value.length < 7) return AppStrings.invalidNumber;
               return null;
             },
-            decoration: const InputDecoration(
-              hintText: 'Número de teléfono',
+            decoration: InputDecoration(
+              hintText: AppStrings.phoneNumber,
               hintStyle: TextStyle(color: Colors.white38),
               labelStyle: TextStyle(color: Colors.white70),
             ),
@@ -191,7 +192,7 @@ class _VerifyButton extends StatelessWidget {
       onPressed: isLoading ? null : onPressed,
       child: isLoading
           ? const SizedBox(width: 24, height: 24, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.black))
-          : const Text('Verifícate'),
+          : Text(AppStrings.verify),
     );
   }
 }

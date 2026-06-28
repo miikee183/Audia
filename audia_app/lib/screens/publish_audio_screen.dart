@@ -4,6 +4,7 @@ import 'package:image_picker/image_picker.dart';
 
 import 'package:provider/provider.dart';
 import '../theme/app_theme.dart';
+import '../l10n/app_strings.dart';
 import '../services/audio_service.dart';
 import '../providers/audio_provider.dart';
 import 'package:audia/widgets/profile_image.dart';
@@ -63,7 +64,7 @@ class _PublishAudioScreenState extends State<PublishAudioScreen> {
     if (!File(widget.filePath).existsSync()) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Error: archivo de audio no encontrado'), backgroundColor: Colors.red),
+          SnackBar(content: Text(AppStrings.audioNotFound), backgroundColor: Colors.red),
         );
       }
       return;
@@ -89,7 +90,7 @@ class _PublishAudioScreenState extends State<PublishAudioScreen> {
         context.read<AudioProvider>().loadAudios();
         Navigator.of(context).popUntil((route) => route.isFirst);
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Audio publicado con éxito')),
+          SnackBar(content: Text(AppStrings.audioPublished)),
         );
       }
     } catch (e) {
@@ -106,7 +107,7 @@ class _PublishAudioScreenState extends State<PublishAudioScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Publicar audio', style: TextStyle(fontWeight: FontWeight.bold)),
+        title: Text(AppStrings.publishAudio, style: const TextStyle(fontWeight: FontWeight.bold)),
         centerTitle: true,
       ),
       body: SingleChildScrollView(
@@ -115,14 +116,14 @@ class _PublishAudioScreenState extends State<PublishAudioScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Así se verá tu audio',
+              AppStrings.thisIsHowItLooks,
               style: TextStyle(color: Colors.white.withAlpha(180), fontSize: 14),
             ),
             const SizedBox(height: 12),
             _buildPreview(),
             const SizedBox(height: 28),
             Text(
-              'Fondo del audio',
+              AppStrings.audioBackground,
               style: TextStyle(color: Colors.white.withAlpha(180), fontSize: 14),
             ),
             const SizedBox(height: 8),
@@ -135,8 +136,8 @@ class _PublishAudioScreenState extends State<PublishAudioScreen> {
                 icon: const Icon(Icons.image_outlined),
                 label: Text(
                   _selectedImagePath != null
-                      ? 'Cambiar imagen'
-                      : 'Elegir imagen de galería',
+                      ? AppStrings.changeImage
+                      : AppStrings.chooseImage,
                 ),
                 style: OutlinedButton.styleFrom(
                   side: BorderSide(color: Colors.white.withAlpha(60)),
@@ -170,7 +171,7 @@ class _PublishAudioScreenState extends State<PublishAudioScreen> {
                         child: CircularProgressIndicator(strokeWidth: 2, color: Colors.black),
                       )
                     : const Icon(Icons.cloud_upload, size: 20),
-                label: Text(_isUploading ? 'Publicando...' : 'Publicar audio'),
+                label: Text(_isUploading ? AppStrings.publishing : AppStrings.publishAudio),
               ),
             ),
           ],
@@ -243,7 +244,7 @@ class _PublishAudioScreenState extends State<PublishAudioScreen> {
                   ),
                   const SizedBox(height: 2),
                   Text(
-                    'Tu usuario',
+                    AppStrings.yourUser,
                     style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w600),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,

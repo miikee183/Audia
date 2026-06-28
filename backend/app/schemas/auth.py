@@ -19,6 +19,8 @@ class AccountInfo(BaseModel):
     num_seguidores: int = 0
     num_siguiendo: int = 0
     likes_totales: int = 0
+    cuenta_privada: bool = False
+    lista_bloqueados: list[str] = []
 
     class Config:
         from_attributes = True

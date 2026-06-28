@@ -9,7 +9,9 @@ import 'package:audia/services/api_service.dart';
 import 'package:audia/services/perfil_service.dart';
 import 'package:audia/widgets/profile_image.dart';
 import 'package:audia/helpers/formatters.dart';
+import 'package:audia/l10n/app_strings.dart';
 import 'package:audia/screens/edit_profile_screen.dart';
+import 'package:audia/screens/settings_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -70,7 +72,7 @@ class ProfileScreenState extends State<ProfileScreen> {
   Future<void> _showLista(String titulo, List<String> perfilIds) async {
     if (perfilIds.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('No hay $titulo')),
+        SnackBar(content: Text(AppStrings.noData.replaceFirst('{label}', titulo))),
       );
       return;
     }
@@ -106,9 +108,9 @@ class ProfileScreenState extends State<ProfileScreen> {
             Text(titulo, style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
             const SizedBox(height: 12),
             if (perfiles.isEmpty)
-              const Padding(
-                padding: EdgeInsets.symmetric(vertical: 32),
-                child: Text('No hay usuarios', style: TextStyle(color: Colors.white38)),
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 32),
+                child: Text(AppStrings.noUsers, style: const TextStyle(color: Colors.white38)),
               )
             else
               ConstrainedBox(
@@ -147,7 +149,7 @@ class ProfileScreenState extends State<ProfileScreen> {
           icon: const Icon(Icons.calendar_month, color: Colors.white70),
           onPressed: () {},
         ),
-        title: const Text('Perfil', style: TextStyle(fontWeight: FontWeight.bold)),
+        title: Text(AppStrings.profile, style: const TextStyle(fontWeight: FontWeight.bold)),
         centerTitle: true,
       ),
       body: ListView(
@@ -159,7 +161,7 @@ class ProfileScreenState extends State<ProfileScreen> {
                 ProfileImage(imageData: _fotoPerfil, radius: 48),
                 const SizedBox(height: 12),
                 Text(
-                  _nombreUsuario.isNotEmpty ? _nombreUsuario : 'Usuario',
+                  _nombreUsuario.isNotEmpty ? _nombreUsuario : AppStrings.userPlaceholder,
                   style: const TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold),
                 ),
               ],
@@ -172,24 +174,24 @@ class ProfileScreenState extends State<ProfileScreen> {
             children: [
               Expanded(
                 child: GestureDetector(
-                  onTap: () => _showLista('Siguiendo', _listaSiguiendo),
-                  child: _Stat(count: formatCount(_numSiguiendo), label: 'Siguiendo'),
+                  onTap: () => _showLista(AppStrings.following, _listaSiguiendo),
+                  child: _Stat(count: formatCount(_numSiguiendo), label: AppStrings.following),
                 ),
               ),
               Expanded(
                 child: GestureDetector(
-                  onTap: () => _showLista('Seguidores', _listaSeguidores),
-                  child: _Stat(count: formatCount(_numSeguidores), label: 'Seguidores'),
+                  onTap: () => _showLista(AppStrings.followers, _listaSeguidores),
+                  child: _Stat(count: formatCount(_numSeguidores), label: AppStrings.followers),
                 ),
               ),
-              Expanded(child: _Stat(count: formatCount(_likesTotales), label: 'Likes')),
+              Expanded(child: _Stat(count: formatCount(_likesTotales), label: AppStrings.likes)),
             ],
           ),
 
           const SizedBox(height: 12),
 
           Text(
-            _biografia.isNotEmpty ? _biografia : 'Sin biografía',
+            _biografia.isNotEmpty ? _biografia : AppStrings.noBio,
             style: const TextStyle(color: Colors.white54, fontSize: 14),
             textAlign: TextAlign.center,
             maxLines: 3,
@@ -216,7 +218,7 @@ class ProfileScreenState extends State<ProfileScreen> {
                     if (result == true) _loadProfile();
                   },
                   icon: const Icon(Icons.edit, size: 18),
-                  label: const Text('Editar perfil'),
+                  label: Text(AppStrings.editProfile),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF81D4FA),
                     foregroundColor: Colors.black,
@@ -231,7 +233,13 @@ class ProfileScreenState extends State<ProfileScreen> {
               Expanded(
                 flex: 3,
                 child: ElevatedButton(
-                  onPressed: () {},
+                  onPressed: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (_) => const SettingsScreen(),
+                      ),
+                    );
+                  },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF3A3A3A),
                     foregroundColor: Colors.white,
@@ -248,12 +256,12 @@ class ProfileScreenState extends State<ProfileScreen> {
 
           const SizedBox(height: 28),
 
-          const Text('Mis audios', style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
+          Text(AppStrings.myAudios, style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
           const SizedBox(height: 12),
           if (_misAudios.isEmpty)
-            const Padding(
-              padding: EdgeInsets.symmetric(vertical: 32),
-              child: Center(child: Text('No has subido audios aún', style: TextStyle(color: Colors.white38))),
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 32),
+              child: Center(child: Text(AppStrings.noAudiosYet, style: const TextStyle(color: Colors.white38))),
             )
           else
             GridView.builder(
@@ -289,7 +297,12 @@ class ProfileScreenState extends State<ProfileScreen> {
   }
 
   String _monthName(int month) {
-    const names = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+    final names = <String>[
+      AppStrings.month1, AppStrings.month2, AppStrings.month3,
+      AppStrings.month4, AppStrings.month5, AppStrings.month6,
+      AppStrings.month7, AppStrings.month8, AppStrings.month9,
+      AppStrings.month10, AppStrings.month11, AppStrings.month12,
+    ];
     return names[month - 1];
   }
 
@@ -601,17 +614,16 @@ class _CommentsSheetState extends State<_CommentsSheet> {
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
-            const Padding(
-              padding: EdgeInsets.symmetric(vertical: 16),
-              child: Text('Comentarios',
-                style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 16),
+              child: Text(AppStrings.comments, style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
             ),
             const Divider(color: Colors.white12, height: 1),
             Expanded(
               child: _loading
                   ? const Center(child: CircularProgressIndicator(color: AppTheme.primaryColor))
                   : _comments.isEmpty
-                      ? const Center(child: Text('Sin comentarios', style: TextStyle(color: Colors.white38)))
+                      ? Center(child: Text(AppStrings.noComments, style: const TextStyle(color: Colors.white38)))
                       : ListView.builder(
                           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                           itemCount: _comments.length,
@@ -653,7 +665,7 @@ class _CommentsSheetState extends State<_CommentsSheet> {
                       controller: _controller,
                       style: const TextStyle(color: Colors.white),
                       decoration: InputDecoration(
-                        hintText: 'Escribe un comentario...',
+                        hintText: AppStrings.writeComment,
                         hintStyle: const TextStyle(color: Colors.white38),
                         filled: true,
                         fillColor: AppTheme.backgroundColor,

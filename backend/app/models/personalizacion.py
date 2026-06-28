@@ -1,6 +1,6 @@
 import uuid
 from datetime import date
-from sqlalchemy import String, Text, Date, Integer, JSON
+from sqlalchemy import String, Text, Date, Integer, JSON, Boolean
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.database.database import Base
 
@@ -16,6 +16,9 @@ class Perfil(Base):
     foto_perfil: Mapped[str | None] = mapped_column(Text, nullable=True)
     biografia: Mapped[str | None] = mapped_column(Text, nullable=True)
     idioma: Mapped[str] = mapped_column(String(50), nullable=False)
+
+    cuenta_privada: Mapped[bool] = mapped_column(Boolean, default=False)
+    lista_bloqueados: Mapped[list] = mapped_column(JSON, default=list)
 
     num_seguidores: Mapped[int] = mapped_column(Integer, default=0)
     num_siguiendo: Mapped[int] = mapped_column(Integer, default=0)

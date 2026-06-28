@@ -11,3 +11,4 @@ class PerfilRequest(BaseModel):
     foto_perfil: Optional[str] = None
     biografia: Optional[str] = None
     idioma: str
+    cuenta_privada: bool = False

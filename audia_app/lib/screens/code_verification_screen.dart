@@ -4,6 +4,7 @@ import '../services/api_service.dart';
 import '../theme/app_theme.dart';
 import '../app_router.dart';
 import '../widgets/app_header.dart';
+import '../l10n/app_strings.dart';
 
 class CodeVerificationScreen extends StatefulWidget {
   final String telefono;
@@ -38,7 +39,7 @@ class _CodeVerificationScreenState extends State<CodeVerificationScreen> {
       });
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Cuenta verificada. Inicia sesión.')),
+        SnackBar(content: Text(AppStrings.accountVerified)),
       );
       context.go('${AppRouter.login}?telefono=${Uri.encodeQueryComponent(widget.telefono)}');
     } catch (e) {
@@ -65,13 +66,13 @@ class _CodeVerificationScreenState extends State<CodeVerificationScreen> {
                 children: [
                   const AppHeader(logoSize: 80, fontSize: 28, spacing: 12),
                   const SizedBox(height: 40),
-                  const Text(
-                    'Introduce código',
-                    style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold, color: Colors.white),
+                  Text(
+                    AppStrings.enterCode,
+                    style: const TextStyle(fontSize: 26, fontWeight: FontWeight.bold, color: Colors.white),
                   ),
                   const SizedBox(height: 12),
                   Text(
-                    'Se envió un código a tu número',
+                    AppStrings.codeSent,
                     style: TextStyle(fontSize: 14, color: Colors.white.withAlpha(180)),
                   ),
                   const SizedBox(height: 32),
@@ -97,7 +98,7 @@ class _CodeVerificationScreenState extends State<CodeVerificationScreen> {
                       ),
                     ),
                     validator: (value) {
-                      if (value == null || value.length != 4) return 'Ingresa el código de 4 dígitos';
+                      if (value == null || value.length != 4) return AppStrings.enter4DigitCode;
                       return null;
                     },
                   ),
@@ -114,7 +115,7 @@ class _CodeVerificationScreenState extends State<CodeVerificationScreen> {
                     ),
                     child: _isLoading
                         ? const SizedBox(width: 24, height: 24, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.black))
-                        : const Text('Verificar código', style: TextStyle(fontSize: 16)),
+                        : Text(AppStrings.verifyCode, style: const TextStyle(fontSize: 16)),
                   ),
                 ],
               ),

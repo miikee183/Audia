@@ -94,6 +94,7 @@ class UpdatePerfilRequest(BaseModel):
     nombre_usuario: Optional[str] = None
     biografia: Optional[str] = None
     foto_perfil: Optional[str] = None
+    cuenta_privada: Optional[bool] = None
 
 
 @router.put("/me")
@@ -113,6 +114,8 @@ def actualizar_perfil(
         perfil.biografia = request.biografia
     if request.foto_perfil is not None:
         perfil.foto_perfil = request.foto_perfil
+    if request.cuenta_privada is not None:
+        perfil.cuenta_privada = request.cuenta_privada
 
     db.commit()
     db.refresh(perfil)
@@ -174,3 +177,59 @@ def toggle_follow(
 
     db.commit()
     return ToggleFollowResponse(siguiendo=True)
+
+
+@router.post("/block/{target_id}")
+def toggle_block(
+    target_id: str,
+    db: Session = Depends(get_db),
+    account_id: str = Depends(get_current_account),
+):
+    cuenta = db.query(Cuenta).filter(Cuenta.id == account_id).first()
+    if not cuenta or not cuenta.perfil:
+        raise HTTPException(status_code=404, detail="Perfil no encontrado")
+
+    target = db.query(Perfil).filter(Perfil.id == target_id).first()
+    if not target:
+        raise HTTPException(status_code=404, detail="Perfil objetivo no encontrado")
+
+    if target_id == cuenta.perfil.id:
+        raise HTTPException(status_code=400, detail="No puedes bloquearte a ti mismo")
+
+    perfil = cuenta.perfil
+    bloqueados = list(perfil.lista_bloqueados or [])
+
+    if target_id in bloqueados:
+        bloqueados.remove(target_id)
+        perfil.lista_bloqueados = bloqueados
+        db.commit()
+        return {"bloqueado": False}
+    else:
+        bloqueados.append(target_id)
+        perfil.lista_bloqueados = bloqueados
+        db.commit()
+        return {"bloqueado": True}
+
+
+@router.get("/bloqueados", response_model=list[PerfilBasico])
+def obtener_bloqueados(
+    db: Session = Depends(get_db),
+    account_id: str = Depends(get_current_account),
+):
+    cuenta = db.query(Cuenta).filter(Cuenta.id == account_id).first()
+    if not cuenta or not cuenta.perfil:
+        raise HTTPException(status_code=404, detail="Perfil no encontrado")
+
+    bloqueados_ids = cuenta.perfil.lista_bloqueados or []
+    if not bloqueados_ids:
+        return []
+
+    perfiles = db.query(Perfil).filter(Perfil.id.in_(bloqueados_ids)).all()
+    return [
+        PerfilBasico(
+            perfil_id=p.id,
+            nombre_usuario=p.nombre_usuario,
+            foto_perfil=p.foto_perfil,
+        )
+        for p in perfiles
+    ]

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../theme/app_theme.dart';
+import '../l10n/app_strings.dart';
 import '../models/audio_model.dart';
 import '../providers/audio_provider.dart';
 import '../providers/auth_provider.dart';
@@ -35,7 +36,7 @@ class _AudioListScreenState extends State<AudioListScreen>
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Audia', style: TextStyle(fontWeight: FontWeight.bold, letterSpacing: 2)),
+        title: Text(AppStrings.appName, style: const TextStyle(fontWeight: FontWeight.bold, letterSpacing: 2)),
         centerTitle: true,
         bottom: TabBar(
           controller: _tabController,
@@ -44,10 +45,10 @@ class _AudioListScreenState extends State<AudioListScreen>
           dividerColor: AppTheme.primaryColor.withAlpha(80),
           labelColor: AppTheme.primaryColor,
           unselectedLabelColor: Colors.white38,
-          tabs: const [
-            Tab(text: 'Para ti'),
-            Tab(text: 'Contactos'),
-            Tab(text: 'Siguiendo'),
+          tabs: [
+            Tab(text: AppStrings.forYou),
+            Tab(text: AppStrings.contacts),
+            Tab(text: AppStrings.following),
           ],
         ),
       ),
@@ -106,23 +107,23 @@ class _AudioGridState extends State<_AudioGrid> {
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       elevation: 8,
       items: [
-        const PopupMenuItem(value: 'follow', child: SizedBox(
+        PopupMenuItem(value: 'follow', child: SizedBox(
           width: 160,
           child: Row(
             children: [
-              Icon(Icons.person_add, color: Color(0xFF64FFDA), size: 20),
-              SizedBox(width: 12),
-              Text('Seguir', style: TextStyle(color: Colors.white, fontSize: 15)),
+              const Icon(Icons.person_add, color: Color(0xFF64FFDA), size: 20),
+              const SizedBox(width: 12),
+              Text(AppStrings.follow, style: const TextStyle(color: Colors.white, fontSize: 15)),
             ],
           ),
         )),
-        const PopupMenuItem(value: 'profile', child: SizedBox(
+        PopupMenuItem(value: 'profile', child: SizedBox(
           width: 160,
           child: Row(
             children: [
-              Icon(Icons.person, color: Color(0xFF64FFDA), size: 20),
-              SizedBox(width: 12),
-              Text('Ver perfil', style: TextStyle(color: Colors.white, fontSize: 15)),
+              const Icon(Icons.person, color: Color(0xFF64FFDA), size: 20),
+              const SizedBox(width: 12),
+              Text(AppStrings.viewProfile, style: const TextStyle(color: Colors.white, fontSize: 15)),
             ],
           ),
         )),
@@ -135,19 +136,21 @@ class _AudioGridState extends State<_AudioGrid> {
           if (!context.mounted) return;
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text(siguiendo ? 'Siguiendo a ${audio.nombreUsuario}' : 'Dejaste de seguir a ${audio.nombreUsuario}'),
+              content: Text(siguiendo
+                  ? AppStrings.followingUser.replaceFirst('{user}', audio.nombreUsuario)
+                  : AppStrings.unfollowedUser.replaceFirst('{user}', audio.nombreUsuario)),
               backgroundColor: AppTheme.surfaceColor,
             ),
           );
         } catch (e) {
           if (!context.mounted) return;
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Error: $e'), backgroundColor: Colors.red),
-          );
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('${AppStrings.error}: $e'), backgroundColor: Colors.red),
+        );
         }
       } else if (value == 'profile') {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Perfil de ${audio.nombreUsuario}'), backgroundColor: AppTheme.surfaceColor),
+          SnackBar(content: Text(AppStrings.profileOf.replaceFirst('{user}', audio.nombreUsuario)), backgroundColor: AppTheme.surfaceColor),
         );
       }
     });
@@ -170,7 +173,7 @@ class _AudioGridState extends State<_AudioGrid> {
           children: [
             Icon(Icons.music_note, size: 64, color: Colors.white24),
             const SizedBox(height: 16),
-            Text('Sin audios aún', style: TextStyle(color: Colors.white38, fontSize: 16)),
+            Text(AppStrings.audioRecents, style: TextStyle(color: Colors.white38, fontSize: 16)),
           ],
         ),
       );
@@ -583,17 +586,16 @@ class _CommentsSheetState extends State<_CommentsSheet> {
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
-            const Padding(
-              padding: EdgeInsets.symmetric(vertical: 16),
-              child: Text('Comentarios',
-                style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 16),
+              child: Text(AppStrings.comments, style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
             ),
             const Divider(color: Colors.white12, height: 1),
             Expanded(
               child: _loading
                   ? const Center(child: CircularProgressIndicator(color: AppTheme.primaryColor))
                   : _comments.isEmpty
-                      ? const Center(child: Text('Sin comentarios', style: TextStyle(color: Colors.white38)))
+                      ? Center(child: Text(AppStrings.noComments, style: const TextStyle(color: Colors.white38)))
                       : ListView.builder(
                           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                           itemCount: _comments.length,
@@ -656,7 +658,7 @@ class _CommentsSheetState extends State<_CommentsSheet> {
                       controller: _controller,
                       style: const TextStyle(color: Colors.white),
                       decoration: InputDecoration(
-                        hintText: 'Escribe un comentario...',
+                        hintText: AppStrings.writeComment,
                         hintStyle: const TextStyle(color: Colors.white38),
                         filled: true,
                         fillColor: AppTheme.backgroundColor,
