@@ -16,14 +16,6 @@ Audia es una plataforma social de audio que te permite grabar y compartir clips 
 - **Bandeja de Entrada** — Mira notificaciones de likes, comentarios y nuevos seguidores
 - **Perfil** — Personaliza tu foto, nombre de usuario y biografía; revisa tu historial de audios
 
-## Capturas de Pantalla
-
-| | | |
-|:---:|:---:|:---:|
-| ![1](audia_app/assets/images/readme1.jpeg) | ![2](audia_app/assets/images/readme2.jpeg) | ![3](audia_app/assets/images/readme3.jpeg) |
-| ![4](audia_app/assets/images/readme4.jpeg) | ![5](audia_app/assets/images/readme5.jpeg) | ![6](audia_app/assets/images/readme6.jpeg) |
-| ![7](audia_app/assets/images/readme7.jpeg) | ![8](audia_app/assets/images/readme8.jpeg) | ![9](audia_app/assets/images/readme9.jpeg) |
-
 ## Tech Stack
 
 - **Frontend:** Flutter / Dart
@@ -32,3 +24,11 @@ Audia es una plataforma social de audio que te permite grabar y compartir clips 
 - **Autenticación:** Google Sign-In (Firebase Auth)
 - **Almacenamiento Multimedia:** Cloudinary
 - **Despliegue:** Render (backend), Google Play (frontend — próximamente)
+
+## Capturas de Pantalla
+
+| | | |
+|:---:|:---:|:---:|
+| ![1](audia_app/assets/images/readme1.jpeg) | ![2](audia_app/assets/images/readme2.jpeg) | ![3](audia_app/assets/images/readme3.jpeg) |
+| ![4](audia_app/assets/images/readme4.jpeg) | ![5](audia_app/assets/images/readme5.jpeg) | ![6](audia_app/assets/images/readme6.jpeg) |
+| ![7](audia_app/assets/images/readme7.jpeg) | ![8](audia_app/assets/images/readme8.jpeg) | ![9](audia_app/assets/images/readme9.jpeg) |
