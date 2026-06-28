@@ -60,6 +60,23 @@ class ApiService {
     throw Exception(error['detail'] ?? 'Error del servidor');
   }
 
+  Future<Map<String, dynamic>> put(String path, Map<String, dynamic> body) async {
+    final response = await _client
+        .put(
+          Uri.parse('$baseUrl$path'),
+          headers: _headers,
+          body: jsonEncode(body),
+        )
+        .timeout(const Duration(seconds: 15));
+    if (response.statusCode >= 200 && response.statusCode < 300) {
+      final decoded = jsonDecode(response.body);
+      if (decoded is List) return {'data': decoded};
+      return decoded as Map<String, dynamic>;
+    }
+    final error = jsonDecode(response.body);
+    throw Exception(error['detail'] ?? 'Error del servidor');
+  }
+
   void dispose() => _client.close();
 }
 

@@ -9,6 +9,7 @@ import 'package:audia/services/api_service.dart';
 import 'package:audia/services/perfil_service.dart';
 import 'package:audia/widgets/profile_image.dart';
 import 'package:audia/helpers/formatters.dart';
+import 'package:audia/screens/edit_profile_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -150,7 +151,7 @@ class ProfileScreenState extends State<ProfileScreen> {
         centerTitle: true,
       ),
       body: ListView(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
         children: [
           Center(
             child: Column(
@@ -197,21 +198,52 @@ class ProfileScreenState extends State<ProfileScreen> {
 
           const SizedBox(height: 20),
 
-          SizedBox(
-            width: double.infinity,
-            child: ElevatedButton.icon(
-              onPressed: () {},
-              icon: const Icon(Icons.edit, size: 18),
-              label: const Text('Editar perfil'),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF81D4FA),
-                foregroundColor: Colors.black,
-                padding: const EdgeInsets.symmetric(vertical: 14),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(14),
+          Row(
+            children: [
+              Expanded(
+                flex: 7,
+                child: ElevatedButton.icon(
+                  onPressed: () async {
+                    final result = await Navigator.of(context).push<bool>(
+                      MaterialPageRoute(
+                        builder: (_) => EditProfileScreen(
+                          currentUsername: _nombreUsuario,
+                          currentBio: _biografia,
+                          currentPhoto: _fotoPerfil,
+                        ),
+                      ),
+                    );
+                    if (result == true) _loadProfile();
+                  },
+                  icon: const Icon(Icons.edit, size: 18),
+                  label: const Text('Editar perfil'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF81D4FA),
+                    foregroundColor: Colors.black,
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                  ),
                 ),
               ),
-            ),
+              const SizedBox(width: 10),
+              Expanded(
+                flex: 3,
+                child: ElevatedButton(
+                  onPressed: () {},
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF3A3A3A),
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                  ),
+                  child: const Icon(Icons.settings, size: 22),
+                ),
+              ),
+            ],
           ),
 
           const SizedBox(height: 28),

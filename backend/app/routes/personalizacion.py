@@ -90,6 +90,35 @@ def obtener_perfiles_por_ids(
     ]
 
 
+class UpdatePerfilRequest(BaseModel):
+    nombre_usuario: Optional[str] = None
+    biografia: Optional[str] = None
+    foto_perfil: Optional[str] = None
+
+
+@router.put("/me")
+def actualizar_perfil(
+    request: UpdatePerfilRequest,
+    db: Session = Depends(get_db),
+    account_id: str = Depends(get_current_account),
+):
+    cuenta = db.query(Cuenta).filter(Cuenta.id == account_id).first()
+    if not cuenta or not cuenta.perfil:
+        raise HTTPException(status_code=404, detail="Perfil no encontrado")
+
+    perfil = cuenta.perfil
+    if request.nombre_usuario is not None:
+        perfil.nombre_usuario = request.nombre_usuario
+    if request.biografia is not None:
+        perfil.biografia = request.biografia
+    if request.foto_perfil is not None:
+        perfil.foto_perfil = request.foto_perfil
+
+    db.commit()
+    db.refresh(perfil)
+    return {"message": "Perfil actualizado con éxito"}
+
+
 class ToggleFollowResponse(BaseModel):
     siguiendo: bool
 
