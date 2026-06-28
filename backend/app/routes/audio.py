@@ -77,7 +77,7 @@ async def upload_audio(
     perfil_id = _get_perfil_id(db, account_id)
 
     suffix = os.path.splitext(file.filename or "audio.mp3")[1] or ".mp3"
-    with tempfile.NamedTemporaryFile(delete=False, suffix=suffix, dir="temp") as tmp:
+    with tempfile.NamedTemporaryFile(delete=False, suffix=suffix) as tmp:
         content = await file.read()
         tmp.write(content)
         tmp_path = tmp.name
@@ -104,7 +104,7 @@ async def upload_audio(
     fondo_final = foto_fondo
     if fondo_file:
         suffix_img = os.path.splitext(fondo_file.filename or "fondo.jpg")[1] or ".jpg"
-        with tempfile.NamedTemporaryFile(delete=False, suffix=suffix_img, dir="temp") as tmp_img:
+        with tempfile.NamedTemporaryFile(delete=False, suffix=suffix_img) as tmp_img:
             content_img = await fondo_file.read()
             tmp_img.write(content_img)
             tmp_img_path = tmp_img.name
