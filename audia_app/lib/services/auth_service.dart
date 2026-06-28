@@ -7,6 +7,7 @@ class AuthResult {
   final String? telefono;
   final String userId;
   final bool tienePerfil;
+  final String? profileId;
 
   AuthResult({
     required this.accessToken,
@@ -14,6 +15,7 @@ class AuthResult {
     this.telefono,
     required this.userId,
     required this.tienePerfil,
+    this.profileId,
   });
 }
 
@@ -50,7 +52,17 @@ class AuthService {
       telefono: data['account']['telefono'] as String?,
       userId: data['account']['id'] as String,
       tienePerfil: data['account']['tiene_perfil'] as bool? ?? false,
+      profileId: data['account']['id_perfil'] as String?,
     );
+  }
+
+  Future<bool> verifySession() async {
+    try {
+      await _api.get('/auth/me');
+      return true;
+    } catch (_) {
+      return false;
+    }
   }
 
   Future<void> signOut() async {

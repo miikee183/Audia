@@ -276,14 +276,24 @@ class _ProfileLikeButton extends StatefulWidget {
   State<_ProfileLikeButton> createState() => _ProfileLikeButtonState();
 }
 
-class _ProfileLikeButtonState extends State<_ProfileLikeButton> {
+class _ProfileLikeButtonState extends State<_ProfileLikeButton>
+    with SingleTickerProviderStateMixin {
   late AudioProvider _provider;
+  late AnimationController _controller;
+  late Animation<double> _animation;
   bool _isLiked = false;
   int _numLikes = 0;
 
   @override
   void initState() {
     super.initState();
+    _controller = AnimationController(
+      duration: const Duration(milliseconds: 200),
+      vsync: this,
+    );
+    _animation = Tween<double>(begin: 1.0, end: 1.35).animate(
+      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
+    );
     _provider = context.read<AudioProvider>();
     _sync();
     _provider.addListener(_onChanged);
@@ -292,6 +302,7 @@ class _ProfileLikeButtonState extends State<_ProfileLikeButton> {
   @override
   void dispose() {
     _provider.removeListener(_onChanged);
+    _controller.dispose();
     super.dispose();
   }
 
@@ -302,6 +313,7 @@ class _ProfileLikeButtonState extends State<_ProfileLikeButton> {
   }
 
   void _onChanged() {
+    if (!mounted) return;
     final a = _provider.audioById(widget.audio.id);
     final newLiked = a?.isLiked ?? widget.audio.isLiked;
     final newNumLikes = a?.numLikes ?? widget.audio.numLikes;
@@ -313,17 +325,29 @@ class _ProfileLikeButtonState extends State<_ProfileLikeButton> {
     }
   }
 
+  void _onTap() {
+    _controller.forward().then((_) => _controller.reverse());
+    widget.onLike();
+  }
+
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: widget.onLike,
+      onTap: _onTap,
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(
-            _isLiked ? Icons.favorite : Icons.favorite_border,
-            size: 20,
-            color: _isLiked ? Colors.red : Colors.white,
+          AnimatedBuilder(
+            animation: _animation,
+            builder: (context, child) => Transform.scale(
+              scale: _animation.value,
+              child: child,
+            ),
+            child: Icon(
+              _isLiked ? Icons.favorite : Icons.favorite_border,
+              size: 20,
+              color: _isLiked ? Colors.red : Colors.white,
+            ),
           ),
           const SizedBox(width: 4),
           Text('$_numLikes',

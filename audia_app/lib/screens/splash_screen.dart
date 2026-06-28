@@ -25,9 +25,14 @@ class _SplashScreenState extends State<SplashScreen> {
     if (!mounted) return;
     final prefs = await SharedPreferences.getInstance();
     if (prefs.getBool('onboarded') == true) {
-      await context.read<AuthProvider>().restoreSession();
+      final valid = await context.read<AuthProvider>().restoreSession();
       if (!mounted) return;
-      context.go(AppRouter.home);
+      if (valid) {
+        context.go(AppRouter.home);
+        return;
+      }
+      await prefs.setBool('onboarded', false);
+      context.go(AppRouter.phone);
       return;
     }
     if (!mounted) return;

@@ -12,6 +12,7 @@ class AudioProvider extends ChangeNotifier {
 
   final Map<String, List<AudioModel>> _audiosBySource = {};
   final Map<String, AudioModel> _audioMap = {};
+  final Map<String, double> _progressMap = {};
   AudioModel? _currentAudio;
   bool _isLoading = false;
   DateTime _lastPlayTime = DateTime.now().subtract(const Duration(seconds: 1));
@@ -27,6 +28,7 @@ class AudioProvider extends ChangeNotifier {
   List<AudioModel> audiosForSource(String source) => _audiosBySource[source] ?? [];
   AudioModel? get currentAudio => _currentAudio;
   AudioModel? audioById(String id) => _audioMap[id];
+  double? progressForAudio(String id) => _progressMap[id];
   bool get isLoading => _isLoading;
   String? get error => _error;
   bool get isPlaying => _isPlaying;
@@ -57,6 +59,9 @@ class AudioProvider extends ChangeNotifier {
   AudioProvider() {
     _positionSub = _player.positionStream.listen((pos) {
       _position = pos;
+      if (_currentAudio != null && _duration != null && _duration!.inMilliseconds > 0) {
+        _progressMap[_currentAudio!.id] = _position.inMilliseconds / _duration!.inMilliseconds;
+      }
       notifyListeners();
     });
     _durationSub = _player.durationStream.listen((dur) {
@@ -115,6 +120,10 @@ class AudioProvider extends ChangeNotifier {
 
   Future<void> pause() async {
     await _player.pause();
+    if (_currentAudio != null && _duration != null && _duration!.inMilliseconds > 0) {
+      _progressMap[_currentAudio!.id] = _position.inMilliseconds / _duration!.inMilliseconds;
+    }
+    notifyListeners();
   }
 
   Future<void> togglePlay() async {

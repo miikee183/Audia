@@ -12,6 +12,7 @@ class AccountInfo(BaseModel):
     correoGoogle: str | None = None
     correoAudia: str | None = None
     tiene_perfil: bool = False
+    id_perfil: str | None = None
     nombre_usuario: str | None = None
     biografia: str | None = None
     foto_perfil: str | None = None

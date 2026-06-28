@@ -125,7 +125,7 @@ class _PersonalizationScreenState extends State<PersonalizationScreen> {
         fotoBase64 = base64Encode(bytes);
       }
 
-      await _api.post('/perfil/', {
+      final result = await _api.post('/perfil/', {
         'cuenta_id': user.userId,
         'fecha_nacimiento': _fechaNacimiento.toIso8601String().split('T')[0],
         'sexo': _sexo,
@@ -139,7 +139,7 @@ class _PersonalizationScreenState extends State<PersonalizationScreen> {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setBool('onboarded', true);
       if (!mounted) return;
-      context.read<AuthProvider>().markPerfilCreado();
+      context.read<AuthProvider>().markPerfilCreado(result['id'] as String?);
       context.go(AppRouter.home);
     } catch (e) {
       if (!mounted) return;

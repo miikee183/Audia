@@ -8,6 +8,7 @@ class AuthUser {
   final String? email;
   final String? telefono;
   final bool tienePerfil;
+  final String? profileId;
   final String accessToken;
 
   AuthUser({
@@ -15,6 +16,7 @@ class AuthUser {
     this.email,
     this.telefono,
     required this.tienePerfil,
+    this.profileId,
     required this.accessToken,
   });
 }
@@ -36,6 +38,7 @@ class AuthProvider extends ChangeNotifier {
       email: result.email,
       telefono: result.telefono,
       tienePerfil: result.tienePerfil,
+      profileId: result.profileId,
       accessToken: result.accessToken,
     );
 
@@ -53,6 +56,7 @@ class AuthProvider extends ChangeNotifier {
       email: (account['correoGoogle'] ?? account['correoAudia']) as String?,
       telefono: account['telefono'] as String?,
       tienePerfil: account['tiene_perfil'] as bool? ?? false,
+      profileId: account['id_perfil'] as String?,
       accessToken: data['access_token'] as String,
     );
 
@@ -69,13 +73,16 @@ class AuthProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  void markPerfilCreado() {
+  String? get profileId => _user?.profileId;
+
+  void markPerfilCreado(String? profileId) {
     if (_user != null) {
       _user = AuthUser(
         userId: _user!.userId,
         email: _user!.email,
         telefono: _user!.telefono,
         tienePerfil: true,
+        profileId: profileId ?? _user!.profileId,
         accessToken: _user!.accessToken,
       );
       _saveSession();
@@ -98,6 +105,7 @@ class AuthProvider extends ChangeNotifier {
     if (_user!.email != null) await prefs.setString('email', _user!.email!);
     if (_user!.telefono != null) await prefs.setString('telefono', _user!.telefono!);
     await prefs.setBool('tienePerfil', _user!.tienePerfil);
+    if (_user!.profileId != null) await prefs.setString('profileId', _user!.profileId!);
   }
 
   Future<void> _clearSession() async {
@@ -107,6 +115,7 @@ class AuthProvider extends ChangeNotifier {
     await prefs.remove('email');
     await prefs.remove('telefono');
     await prefs.remove('tienePerfil');
+    await prefs.remove('profileId');
   }
 
   Future<bool> restoreSession() async {
@@ -119,10 +128,19 @@ class AuthProvider extends ChangeNotifier {
       email: prefs.getString('email'),
       telefono: prefs.getString('telefono'),
       tienePerfil: prefs.getBool('tienePerfil') ?? false,
+      profileId: prefs.getString('profileId'),
       accessToken: token,
     );
     ApiService.setToken(token);
-    notifyListeners();
-    return true;
+    try {
+      await _api.get('/auth/me');
+      notifyListeners();
+      return true;
+    } catch (_) {
+      _user = null;
+      ApiService.setToken(null);
+      await _clearSession();
+      return false;
+    }
   }
 }

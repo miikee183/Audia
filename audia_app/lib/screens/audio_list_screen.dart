@@ -4,6 +4,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import '../theme/app_theme.dart';
 import '../models/audio_model.dart';
 import '../providers/audio_provider.dart';
+import '../providers/auth_provider.dart';
 import '../widgets/profile_image.dart';
 
 class AudioListScreen extends StatefulWidget {
@@ -94,22 +95,35 @@ class _AudioGridState extends State<_AudioGrid> {
   }
 
   void _showCardMenu(BuildContext context, AudioModel audio, Offset position) {
+    final profileId = context.read<AuthProvider>().profileId;
+    if (profileId != null && audio.idPerfilDueno == profileId) return;
+
     showMenu<String>(
       context: context,
       position: RelativeRect.fromLTRB(position.dx, position.dy, position.dx + 1, position.dy + 1),
-      color: AppTheme.surfaceColor,
+      color: const Color(0xFF1E1E2E),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      elevation: 8,
       items: [
-        const PopupMenuItem(value: 'follow', child: ListTile(
-          leading: Icon(Icons.person_add, color: Colors.white),
-          title: Text('Seguir', style: TextStyle(color: Colors.white)),
-          dense: true,
-          contentPadding: EdgeInsets.zero,
+        const PopupMenuItem(value: 'follow', child: SizedBox(
+          width: 160,
+          child: Row(
+            children: [
+              Icon(Icons.person_add, color: Color(0xFF64FFDA), size: 20),
+              SizedBox(width: 12),
+              Text('Seguir', style: TextStyle(color: Colors.white, fontSize: 15)),
+            ],
+          ),
         )),
-        const PopupMenuItem(value: 'profile', child: ListTile(
-          leading: Icon(Icons.person, color: Colors.white),
-          title: Text('Ver perfil', style: TextStyle(color: Colors.white)),
-          dense: true,
-          contentPadding: EdgeInsets.zero,
+        const PopupMenuItem(value: 'profile', child: SizedBox(
+          width: 160,
+          child: Row(
+            children: [
+              Icon(Icons.person, color: Color(0xFF64FFDA), size: 20),
+              SizedBox(width: 12),
+              Text('Ver perfil', style: TextStyle(color: Colors.white, fontSize: 15)),
+            ],
+          ),
         )),
       ],
     ).then((value) {
@@ -274,6 +288,7 @@ class _CommentButtonState extends State<_CommentButton> {
   }
 
   void _onChanged() {
+    if (!mounted) return;
     final newCount = _provider.audioById(widget.audio.id)?.numComentarios ?? widget.audio.numComentarios;
     if (newCount != _numComentarios) {
       setState(() => _numComentarios = newCount);
@@ -316,6 +331,58 @@ class _PlayStateIcon extends StatelessWidget {
       child: isPlaying
           ? const Icon(Icons.pause, size: 14, color: Colors.black)
           : const Icon(Icons.music_note, size: 14, color: Colors.black),
+    );
+  }
+}
+
+class _RingPainter extends CustomPainter {
+  final double progress;
+  _RingPainter(this.progress);
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final center = Offset(size.width / 2, size.height / 2);
+    final radius = (size.width - 2.5) / 2;
+    final paint = Paint()
+      ..color = AppTheme.primaryColor
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 2.5
+      ..strokeCap = StrokeCap.round;
+    final startAngle = -1.5708 + progress * 6.2832;
+    final sweepAngle = (1.0 - progress) * 6.2832;
+    canvas.drawArc(Rect.fromCircle(center: center, radius: radius),
+        startAngle, sweepAngle, false, paint);
+  }
+
+  @override
+  bool shouldRepaint(_RingPainter old) => old.progress != progress;
+}
+
+class _AudioProgressRing extends StatelessWidget {
+  final String audioId;
+  final Widget child;
+  const _AudioProgressRing({required this.audioId, required this.child});
+
+  @override
+  Widget build(BuildContext context) {
+    final progress = context.select<AudioProvider, double?>(
+      (p) => p.progressForAudio(audioId),
+    );
+    final p = progress ?? 0.0;
+    if (p >= 1.0) return child;
+    return SizedBox(
+      width: 60,
+      height: 60,
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          CustomPaint(
+            size: const Size(60, 60),
+            painter: _RingPainter(p),
+          ),
+          child,
+        ],
+      ),
     );
   }
 }
@@ -381,7 +448,10 @@ class _AudioCard extends StatelessWidget {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    ProfileImage(imageData: audio.fotoPerfil, radius: 27),
+                    _AudioProgressRing(
+                      audioId: audio.id,
+                      child: ProfileImage(imageData: audio.fotoPerfil, radius: 27),
+                    ),
                     const SizedBox(height: 6),
                     Text(
                       _formatDuration(audio.duracion),

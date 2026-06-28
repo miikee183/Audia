@@ -25,6 +25,7 @@ def _cuenta_to_response(cuenta: Cuenta) -> AuthResponse:
         "tiene_perfil": cuenta.perfil is not None,
     }
     if cuenta.perfil:
+        account_data["id_perfil"] = cuenta.perfil.id
         account_data["nombre_usuario"] = cuenta.perfil.nombre_usuario
         account_data["biografia"] = cuenta.perfil.biografia
         account_data["foto_perfil"] = cuenta.perfil.foto_perfil
