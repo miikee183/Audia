@@ -6,6 +6,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:image_cropper/image_cropper.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../providers/auth_provider.dart';
 import '../services/api_service.dart';
 import '../app_router.dart';
@@ -134,6 +135,9 @@ class _PersonalizationScreenState extends State<PersonalizationScreen> {
         'idioma': _idioma,
       });
 
+      if (!mounted) return;
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setBool('onboarded', true);
       if (!mounted) return;
       context.read<AuthProvider>().markPerfilCreado();
       context.go(AppRouter.home);

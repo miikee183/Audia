@@ -171,16 +171,17 @@ def toggle_like(
     if not audio:
         raise HTTPException(status_code=404, detail="Audio no encontrado")
 
-    if not audio.lista_likes_perfiles:
-        audio.lista_likes_perfiles = []
+    likes = list(audio.lista_likes_perfiles or [])
 
-    if perfil_id in audio.lista_likes_perfiles:
-        audio.lista_likes_perfiles.remove(perfil_id)
+    if perfil_id in likes:
+        likes.remove(perfil_id)
+        audio.lista_likes_perfiles = likes
         audio.num_likes = max(0, audio.num_likes - 1)
         db.commit()
         return {"liked": False, "num_likes": audio.num_likes}
     else:
-        audio.lista_likes_perfiles.append(perfil_id)
+        likes.append(perfil_id)
+        audio.lista_likes_perfiles = likes
         audio.num_likes += 1
         db.commit()
         return {"liked": True, "num_likes": audio.num_likes}
@@ -274,16 +275,17 @@ def toggle_comentario_like(
     if not comentario:
         raise HTTPException(status_code=404, detail="Comentario no encontrado")
 
-    if not comentario.lista_likes_perfiles:
-        comentario.lista_likes_perfiles = []
+    likes = list(comentario.lista_likes_perfiles or [])
 
-    if perfil_id in comentario.lista_likes_perfiles:
-        comentario.lista_likes_perfiles.remove(perfil_id)
+    if perfil_id in likes:
+        likes.remove(perfil_id)
+        comentario.lista_likes_perfiles = likes
         comentario.num_likes = max(0, comentario.num_likes - 1)
         db.commit()
         return {"liked": False, "num_likes": comentario.num_likes}
     else:
-        comentario.lista_likes_perfiles.append(perfil_id)
+        likes.append(perfil_id)
+        comentario.lista_likes_perfiles = likes
         comentario.num_likes += 1
         db.commit()
         return {"liked": True, "num_likes": comentario.num_likes}

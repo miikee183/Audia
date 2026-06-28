@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../theme/app_theme.dart';
 import '../providers/audio_provider.dart';
 import '../widgets/playback_bar.dart';
@@ -18,14 +19,38 @@ class MainShell extends StatefulWidget {
 
 class _MainShellState extends State<MainShell> {
   int _currentIndex = 0;
+  final _profileKey = GlobalKey<ProfileScreenState>();
 
-  final List<Widget> _screens = const [
-    AudioListScreen(),
-    InboxScreen(),
-    RecordScreen(),
-    FriendsScreen(),
-    ProfileScreen(),
+  late final List<Widget> _screens = [
+    const AudioListScreen(),
+    const InboxScreen(),
+    const RecordScreen(),
+    const FriendsScreen(),
+    ProfileScreen(key: _profileKey),
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    _loadTab();
+    _saveOnboarded();
+  }
+
+  Future<void> _loadTab() async {
+    final prefs = await SharedPreferences.getInstance();
+    final tab = prefs.getInt('tabIndex') ?? 0;
+    if (mounted) setState(() => _currentIndex = tab);
+  }
+
+  Future<void> _saveOnboarded() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('onboarded', true);
+  }
+
+  Future<void> _saveTab(int index) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt('tabIndex', index);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -50,7 +75,15 @@ class _MainShellState extends State<MainShell> {
       ),
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _currentIndex,
-        onTap: (index) => setState(() => _currentIndex = index),
+        onTap: (index) {
+          if (index == _currentIndex) return;
+          context.read<AudioProvider>().stop();
+          setState(() {
+            _currentIndex = index;
+            _saveTab(index);
+          });
+          if (index == 4) _profileKey.currentState?.loadProfile();
+        },
         backgroundColor: AppTheme.backgroundColor,
         selectedItemColor: AppTheme.primaryColor,
         unselectedItemColor: Colors.white38,

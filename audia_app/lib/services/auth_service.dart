@@ -32,8 +32,8 @@ class AuthService {
     defaultValue: '615052367691-hi0gjbtauj2lb4ctd27ol69297j68274.apps.googleusercontent.com',
   );
 
-  Future<AuthResult> signInWithGoogle({String? telefono}) async {
-    final account = await _googleSignIn.signIn();
+  Future<AuthResult> signInWithGoogle({String? telefono, bool silent = false}) async {
+    final account = silent ? await _googleSignIn.signInSilently() : await _googleSignIn.signIn();
     if (account == null) throw Exception('Inicio de sesión cancelado');
 
     final auth = await account.authentication;

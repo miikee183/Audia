@@ -4,7 +4,7 @@ import 'package:just_audio/just_audio.dart';
 import 'package:audia/models/audio_model.dart';
 import 'package:audia/services/audio_service.dart';
 
-enum PlaybackSpeed { x1, x2, x4 }
+enum PlaybackSpeed { x1, x1_5, x2, x4 }
 
 class AudioProvider extends ChangeNotifier {
   final AudioService _audioService = AudioService();
@@ -14,6 +14,7 @@ class AudioProvider extends ChangeNotifier {
   final Map<String, AudioModel> _audioMap = {};
   AudioModel? _currentAudio;
   bool _isLoading = false;
+  DateTime _lastPlayTime = DateTime.now().subtract(const Duration(seconds: 1));
   String? _error;
   bool _isPlaying = false;
   Duration _position = Duration.zero;
@@ -25,13 +26,21 @@ class AudioProvider extends ChangeNotifier {
 
   List<AudioModel> audiosForSource(String source) => _audiosBySource[source] ?? [];
   AudioModel? get currentAudio => _currentAudio;
+  AudioModel? audioById(String id) => _audioMap[id];
   bool get isLoading => _isLoading;
   String? get error => _error;
   bool get isPlaying => _isPlaying;
   Duration get position => _position;
   Duration? get duration => _duration;
   PlaybackSpeed get speed => _speed;
-  double get speedValue => _speed == PlaybackSpeed.x1 ? 1.0 : (_speed == PlaybackSpeed.x2 ? 2.0 : 4.0);
+  double get speedValue {
+    switch (_speed) {
+      case PlaybackSpeed.x1: return 1.0;
+      case PlaybackSpeed.x1_5: return 1.5;
+      case PlaybackSpeed.x2: return 2.0;
+      case PlaybackSpeed.x4: return 4.0;
+    }
+  }
   double get progress => _duration != null && _duration!.inMilliseconds > 0
       ? (_position.inMilliseconds / _duration!.inMilliseconds).clamp(0.0, 1.0)
       : 0.0;
@@ -86,6 +95,10 @@ class AudioProvider extends ChangeNotifier {
       return;
     }
 
+    final now = DateTime.now();
+    if (now.difference(_lastPlayTime).inMilliseconds < 1000) return;
+    _lastPlayTime = now;
+
     await _player.stop();
     _currentAudio = audio;
     notifyListeners();
@@ -139,15 +152,22 @@ class AudioProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  bool _togglingLike = false;
+
   Future<void> toggleLike(String audioId) async {
+    if (_togglingLike) return;
+    _togglingLike = true;
     final audio = _audioMap[audioId];
-    if (audio == null) return;
+    if (audio == null) { _togglingLike = false; return; }
     try {
       final result = await _audioService.toggleLike(audioId);
       audio.isLiked = result['liked'] as bool;
       audio.numLikes = (result['num_likes'] as num).toInt();
       notifyListeners();
-    } catch (_) {}
+    } catch (_) {
+    } finally {
+      _togglingLike = false;
+    }
   }
 
   Future<ComentarioModel> addComment(String audioId, String texto) async {
@@ -162,6 +182,14 @@ class AudioProvider extends ChangeNotifier {
 
   Future<List<ComentarioModel>> getComments(String audioId) async {
     return await _audioService.getComments(audioId);
+  }
+
+  Future<Map<String, dynamic>> toggleLikeComment(String audioId, String comentarioId) async {
+    try {
+      return await _audioService.toggleLikeComment(audioId, comentarioId);
+    } catch (_) {
+      return {'liked': false, 'num_likes': 0};
+    }
   }
 
   @override

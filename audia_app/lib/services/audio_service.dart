@@ -53,5 +53,9 @@ class AudioService {
     return list.map((j) => ComentarioModel.fromJson(j as Map<String, dynamic>)).toList();
   }
 
+  Future<Map<String, dynamic>> toggleLikeComment(String audioId, String comentarioId) async {
+    return await _api.post('/audio/$audioId/comentario/$comentarioId/like', {});
+  }
+
   void dispose() => _api.dispose();
 }

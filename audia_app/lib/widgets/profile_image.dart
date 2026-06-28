@@ -1,6 +1,9 @@
 import 'dart:convert';
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
+import 'package:cached_network_image/cached_network_image.dart';
+
+final Map<String, CachedNetworkImageProvider> _providerCache = {};
 
 class ProfileImage extends StatelessWidget {
   final String? imageData;
@@ -8,21 +11,25 @@ class ProfileImage extends StatelessWidget {
 
   const ProfileImage({super.key, required this.imageData, this.radius = 48});
 
+  Widget _fallback() {
+    return CircleAvatar(
+      radius: radius,
+      backgroundColor: Colors.white12,
+      child: Icon(Icons.person, size: radius, color: Colors.white70),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final data = imageData;
-    if (data == null || data.isEmpty) {
-      return CircleAvatar(
-        radius: radius,
-        backgroundColor: Colors.white12,
-        child: Icon(Icons.person, size: radius, color: Colors.white70),
-      );
-    }
+    if (data == null || data.isEmpty) return _fallback();
 
     if (data.startsWith('http://') || data.startsWith('https://')) {
+      final provider =
+          _providerCache.putIfAbsent(data, () => CachedNetworkImageProvider(data));
       return CircleAvatar(
         radius: radius,
-        backgroundImage: NetworkImage(data),
+        backgroundImage: provider,
       );
     }
 
@@ -33,11 +40,7 @@ class ProfileImage extends StatelessWidget {
         backgroundImage: MemoryImage(Uint8List.fromList(bytes)),
       );
     } catch (_) {
-      return CircleAvatar(
-        radius: radius,
-        backgroundColor: Colors.white12,
-        child: Icon(Icons.person, size: radius, color: Colors.white70),
-      );
+      return _fallback();
     }
   }
 }
@@ -45,7 +48,8 @@ class ProfileImage extends StatelessWidget {
 ImageProvider? profileImageProvider(String? imageData) {
   if (imageData == null || imageData.isEmpty) return null;
   if (imageData.startsWith('http://') || imageData.startsWith('https://')) {
-    return NetworkImage(imageData);
+    return _providerCache.putIfAbsent(
+        imageData, () => CachedNetworkImageProvider(imageData));
   }
   try {
     final bytes = base64Decode(imageData);

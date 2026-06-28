@@ -45,3 +45,8 @@ def root():
 @app.get("/health")
 def health():
     return {"status": "ok"}
+
+@app.get("/reset")
+def reset():
+    reset_all_tables(force=True)
+    return {"message": "Todos los datos han sido eliminados"}

@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../app_router.dart';
+import '../providers/auth_provider.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -14,10 +17,21 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
     super.initState();
-    Future.delayed(const Duration(milliseconds: 1800), () {
+    _start();
+  }
+
+  Future<void> _start() async {
+    await Future.delayed(const Duration(milliseconds: 1800));
+    if (!mounted) return;
+    final prefs = await SharedPreferences.getInstance();
+    if (prefs.getBool('onboarded') == true) {
+      await context.read<AuthProvider>().restoreSession();
       if (!mounted) return;
-      context.go(AppRouter.phone);
-    });
+      context.go(AppRouter.home);
+      return;
+    }
+    if (!mounted) return;
+    context.go(AppRouter.phone);
   }
 
   @override
@@ -43,7 +57,6 @@ class _SplashScreenState extends State<SplashScreen> {
                   'assets/images/Logo.png',
                   width: logoSize,
                   height: logoSize,
-                  // Guard against cacheWidth=0 when screen is not yet measured
                   cacheWidth: logoSize > 0 ? (logoSize * dpr).round() : null,
                   cacheHeight: logoSize > 0 ? (logoSize * dpr).round() : null,
                 ),
@@ -55,4 +68,3 @@ class _SplashScreenState extends State<SplashScreen> {
     );
   }
 }
-

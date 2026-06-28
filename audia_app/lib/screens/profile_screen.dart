@@ -1,5 +1,6 @@
 ﻿import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:audia/theme/app_theme.dart';
 import 'package:audia/providers/audio_provider.dart';
 import 'package:audia/models/audio_model.dart';
@@ -12,10 +13,10 @@ class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
 
   @override
-  State<ProfileScreen> createState() => _ProfileScreenState();
+  ProfileScreenState createState() => ProfileScreenState();
 }
 
-class _ProfileScreenState extends State<ProfileScreen> {
+class ProfileScreenState extends State<ProfileScreen> {
   final ApiService _api = ApiService();
   final PerfilService _perfilService = PerfilService();
   bool _loading = true;
@@ -34,6 +35,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
     super.initState();
     _loadProfile();
   }
+
+  void loadProfile() => _loadProfile();
 
   Future<void> _loadProfile() async {
     try {
@@ -220,34 +223,30 @@ class _ProfileScreenState extends State<ProfileScreen> {
               child: Center(child: Text('No has subido audios aún', style: TextStyle(color: Colors.white38))),
             )
           else
-            Consumer<AudioProvider>(
-              builder: (context, provider, _) {
-                final sorted = _misAudios.reversed.toList();
-                return GridView.builder(
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 2,
-                    childAspectRatio: 0.82,
-                    crossAxisSpacing: 10,
-                    mainAxisSpacing: 10,
-                  ),
-                  itemCount: sorted.length,
-                  itemBuilder: (context, index) {
-                    final audio = sorted[index];
-                    return _ProfileAudioCard(
-                      audio: audio,
-                      onPlayPause: () {
-                        if (provider.currentAudio?.id == audio.id) {
-                          provider.togglePlay();
-                        } else {
-                          provider.play(audio);
-                        }
-                      },
-                      onLike: () => provider.toggleLike(audio.id),
-                      onComment: () => _openComments(context, audio.id),
-                    );
+            GridView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 2,
+                childAspectRatio: 0.82,
+                crossAxisSpacing: 10,
+                mainAxisSpacing: 10,
+              ),
+              itemCount: _misAudios.length,
+              itemBuilder: (context, index) {
+                final audio = _misAudios[index];
+                return _ProfileAudioCard(
+                  audio: audio,
+                  onPlayPause: () {
+                    final p = context.read<AudioProvider>();
+                    if (p.currentAudio?.id == audio.id) {
+                      p.togglePlay();
+                    } else {
+                      p.play(audio);
+                    }
                   },
+                  onLike: () => context.read<AudioProvider>().toggleLike(audio.id),
+                  onComment: () => _openComments(context, audio.id),
                 );
               },
             ),
@@ -265,6 +264,73 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final m = totalSeconds ~/ 60;
     final s = totalSeconds % 60;
     return '$m:${s.toString().padLeft(2, '0')}';
+  }
+}
+
+class _ProfileLikeButton extends StatefulWidget {
+  final AudioModel audio;
+  final VoidCallback onLike;
+  const _ProfileLikeButton({required this.audio, required this.onLike});
+
+  @override
+  State<_ProfileLikeButton> createState() => _ProfileLikeButtonState();
+}
+
+class _ProfileLikeButtonState extends State<_ProfileLikeButton> {
+  late AudioProvider _provider;
+  bool _isLiked = false;
+  int _numLikes = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _provider = context.read<AudioProvider>();
+    _sync();
+    _provider.addListener(_onChanged);
+  }
+
+  @override
+  void dispose() {
+    _provider.removeListener(_onChanged);
+    super.dispose();
+  }
+
+  void _sync() {
+    final a = _provider.audioById(widget.audio.id);
+    _isLiked = a?.isLiked ?? widget.audio.isLiked;
+    _numLikes = a?.numLikes ?? widget.audio.numLikes;
+  }
+
+  void _onChanged() {
+    final a = _provider.audioById(widget.audio.id);
+    final newLiked = a?.isLiked ?? widget.audio.isLiked;
+    final newNumLikes = a?.numLikes ?? widget.audio.numLikes;
+    if (newLiked != _isLiked || newNumLikes != _numLikes) {
+      setState(() {
+        _isLiked = newLiked;
+        _numLikes = newNumLikes;
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: widget.onLike,
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            _isLiked ? Icons.favorite : Icons.favorite_border,
+            size: 20,
+            color: _isLiked ? Colors.red : Colors.white,
+          ),
+          const SizedBox(width: 4),
+          Text('$_numLikes',
+            style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w600)),
+        ],
+      ),
+    );
   }
 }
 
@@ -350,22 +416,7 @@ class _ProfileAudioCard extends StatelessWidget {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      GestureDetector(
-                        onTap: onLike,
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(
-                              audio.isLiked ? Icons.favorite : Icons.favorite_border,
-                              size: 20,
-                              color: audio.isLiked ? Colors.red : Colors.white,
-                            ),
-                            const SizedBox(width: 4),
-                            Text('${audio.numLikes}',
-                              style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w600)),
-                          ],
-                        ),
-                      ),
+                      _ProfileLikeButton(audio: audio, onLike: onLike),
                       GestureDetector(
                         onTap: onComment,
                         child: Row(
@@ -586,16 +637,16 @@ class _ProfileAudioBackground extends StatelessWidget {
       return Container(color: color);
     }
     if (fotoFondo != null && (fotoFondo!.startsWith('http://') || fotoFondo!.startsWith('https://'))) {
-      return Image.network(
-        fotoFondo!,
+      return CachedNetworkImage(
+        imageUrl: fotoFondo!,
         fit: BoxFit.cover,
-        errorBuilder: (_, __, ___) => Container(color: const Color(0xFF1A1A2E)),
+        errorWidget: (_, __, ___) => Container(color: const Color(0xFF1A1A2E)),
       );
     }
-    return Image.network(
-      'https://picsum.photos/seed/$audioId/400/300',
+    return CachedNetworkImage(
+      imageUrl: 'https://picsum.photos/seed/$audioId/400/300',
       fit: BoxFit.cover,
-      errorBuilder: (_, __, ___) => Container(color: const Color(0xFF1A1A2E)),
+      errorWidget: (_, __, ___) => Container(color: const Color(0xFF1A1A2E)),
     );
   }
 }

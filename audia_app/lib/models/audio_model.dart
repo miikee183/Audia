@@ -58,8 +58,8 @@ class ComentarioModel {
   final String nombreUsuario;
   final String? fotoPerfil;
   final String texto;
-  final int numLikes;
-  final bool isLiked;
+  int numLikes;
+  bool isLiked;
 
   ComentarioModel({
     required this.id,
