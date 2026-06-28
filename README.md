@@ -1,4 +1,4 @@
-![Logo](audia_app/lib/assets/imagenes/Logo.jpeg)
+![Logo](audia_app/lib/assets/images/Logo.jpeg)
 
 # Audia
 
