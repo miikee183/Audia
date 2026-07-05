@@ -6,11 +6,10 @@ import '../providers/auth_provider.dart';
 import '../app_router.dart';
 import '../theme/app_theme.dart';
 import '../widgets/app_header.dart';
-import '../l10n/app_strings.dart';
 
 class SignUpScreen extends StatefulWidget {
   final String? telefono;
-
+  
   const SignUpScreen({super.key, this.telefono});
 
   @override
@@ -76,13 +75,13 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     controller: _emailController,
                     keyboardType: TextInputType.emailAddress,
                     validator: (v) {
-                      if (v == null || v.isEmpty) return AppStrings.enterEmail;
-                      if (!RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$').hasMatch(v)) return AppStrings.invalidEmail;
+                      if (v == null || v.isEmpty) return 'Ingresa tu correo';
+                      if (!RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$').hasMatch(v)) return 'Correo inválido';
                       return null;
                     },
-                    decoration: InputDecoration(
-                      labelText: AppStrings.emailLabel,
-                      prefixIcon: const Icon(Icons.email_outlined, color: AppTheme.primaryColor),
+                    decoration: const InputDecoration(
+                      labelText: 'Correo electrónico',
+                      prefixIcon: Icon(Icons.email_outlined, color: AppTheme.primaryColor),
                     ),
                   ),
                   const SizedBox(height: 16),
@@ -90,12 +89,12 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     controller: _passwordController,
                     obscureText: _obscurePassword,
                     validator: (v) {
-                      if (v == null || v.isEmpty) return AppStrings.enterPassword;
-                      if (v.length < 6) return AppStrings.minChars;
+                      if (v == null || v.isEmpty) return 'Ingresa tu contraseña';
+                      if (v.length < 6) return 'Mínimo 6 caracteres';
                       return null;
                     },
                     decoration: InputDecoration(
-                      labelText: AppStrings.passwordLabel,
+                      labelText: 'Contraseña',
                       prefixIcon: const Icon(Icons.lock_outline, color: AppTheme.primaryColor),
                       suffixIcon: IconButton(
                         icon: Icon(
@@ -111,16 +110,16 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     onPressed: _isLoading ? null : _signUp,
                     child: _isLoading
                         ? const SizedBox(width: 24, height: 24, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.black))
-                        : Text(AppStrings.createAccount),
+                        : const Text('Crear cuenta'),
                   ),
                   const SizedBox(height: 24),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Text(AppStrings.haveAccount, style: TextStyle(color: Colors.white.withAlpha(180))),
+                      Text('¿Ya tienes cuenta? ', style: TextStyle(color: Colors.white.withAlpha(180))),
                       TextButton(
                         onPressed: () => context.pop(),
-                        child: Text(AppStrings.logInLink),
+                        child: const Text('Inicia sesión'),
                       ),
                     ],
                   ),
