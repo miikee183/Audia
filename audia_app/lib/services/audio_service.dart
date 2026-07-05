@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:audia/services/api_service.dart';
 import 'package:audia/models/audio_model.dart';
+import 'package:audia/l10n/app_strings.dart';
 
 class AudioService {
   final ApiService _api = ApiService();
@@ -32,9 +33,9 @@ class AudioService {
     }
     try {
       final error = jsonDecode(response.body) as Map<String, dynamic>;
-      throw Exception(error['detail'] ?? 'Error del servidor');
+      throw Exception(error['detail'] ?? AppStrings.serverError);
     } catch (_) {
-      throw Exception('Error del servidor (${response.statusCode}): ${response.body.length > 200 ? response.body.substring(0, 200) : response.body}');
+      throw Exception('${AppStrings.serverError} (${response.statusCode}): ${response.body.length > 200 ? response.body.substring(0, 200) : response.body}');
     }
   }
 

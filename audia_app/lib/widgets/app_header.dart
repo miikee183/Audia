@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../l10n/app_strings.dart';
 
 class AppHeader extends StatelessWidget {
   final double logoSize;
@@ -26,7 +27,7 @@ class AppHeader extends StatelessWidget {
         ),
         SizedBox(height: spacing),
         Text(
-          'Audia',
+          AppStrings.appName,
           style: TextStyle(
             fontSize: fontSize,
             fontWeight: FontWeight.bold,

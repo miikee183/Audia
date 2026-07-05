@@ -1,5 +1,6 @@
 import 'package:google_sign_in/google_sign_in.dart';
 import 'api_service.dart';
+import '../l10n/app_strings.dart';
 
 class AuthResult {
   final String accessToken;
@@ -36,11 +37,11 @@ class AuthService {
 
   Future<AuthResult> signInWithGoogle({String? telefono, bool silent = false}) async {
     final account = silent ? await _googleSignIn.signInSilently() : await _googleSignIn.signIn();
-    if (account == null) throw Exception('Inicio de sesión cancelado');
+    if (account == null) throw Exception(AppStrings.loginCancelled);
 
     final auth = await account.authentication;
     final idToken = auth.idToken;
-    if (idToken == null) throw Exception('No se pudo obtener el token de Google');
+    if (idToken == null) throw Exception(AppStrings.googleTokenError);
 
     final body = <String, dynamic>{'id_token': idToken};
     if (telefono != null) body['telefono'] = telefono;

@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:audia/models/audio_model.dart';
 import 'package:audia/services/audio_service.dart';
+import 'package:audia/l10n/app_strings.dart';
 
 enum PlaybackSpeed { x1, x1_5, x2, x4 }
 
@@ -113,7 +114,7 @@ class AudioProvider extends ChangeNotifier {
       await _player.setSpeed(speedValue);
       await _player.play();
     } catch (e) {
-      _error = 'Error al reproducir audio';
+      _error = AppStrings.audioPlayError;
       notifyListeners();
     }
   }

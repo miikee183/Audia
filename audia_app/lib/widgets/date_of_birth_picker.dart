@@ -1,6 +1,7 @@
 ﻿import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import '../theme/app_theme.dart';
+import '../l10n/app_strings.dart';
 
 class DateOfBirthPicker extends StatefulWidget {
   final ValueChanged<DateTime>? onChanged;
@@ -19,10 +20,15 @@ class _DateOfBirthPickerState extends State<DateOfBirthPicker> {
   late FixedExtentScrollController _monthController;
   late FixedExtentScrollController _yearController;
 
-  static const _monthNames = [
-    'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
-    'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre',
-  ];
+  static List<String> _monthNames(String locale) {
+    final months = [
+      AppStrings.month1, AppStrings.month2, AppStrings.month3,
+      AppStrings.month4, AppStrings.month5, AppStrings.month6,
+      AppStrings.month7, AppStrings.month8, AppStrings.month9,
+      AppStrings.month10, AppStrings.month11, AppStrings.month12,
+    ];
+    return months;
+  }
 
   @override
   void initState() {
@@ -89,7 +95,7 @@ class _DateOfBirthPickerState extends State<DateOfBirthPicker> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Fecha de nacimiento',
+          AppStrings.birthDate,
           style: TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.w600,
@@ -105,9 +111,9 @@ class _DateOfBirthPickerState extends State<DateOfBirthPicker> {
           padding: const EdgeInsets.symmetric(vertical: 8),
           child: Row(
             children: [
-              Expanded(child: _buildWheel(label: 'Día', items: days, controller: _dayController, onChanged: _onDayChanged)),
-              Expanded(child: _buildWheel(label: 'Mes', items: _monthNames, controller: _monthController, onChanged: _onMonthChanged)),
-              Expanded(flex: 2, child: _buildWheel(label: 'Año', items: years, controller: _yearController, onChanged: _onYearChanged)),
+              Expanded(child: _buildWheel(label: AppStrings.dayLabel, items: days, controller: _dayController, onChanged: _onDayChanged)),
+              Expanded(child: _buildWheel(label: AppStrings.monthLabel, items: _monthNames(AppStrings.locale), controller: _monthController, onChanged: _onMonthChanged)),
+              Expanded(flex: 2, child: _buildWheel(label: AppStrings.yearLabel, items: years, controller: _yearController, onChanged: _onYearChanged)),
             ],
           ),
         ),

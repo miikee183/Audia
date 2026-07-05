@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../theme/app_theme.dart';
+import '../l10n/app_strings.dart';
 
 class PasswordField extends StatefulWidget {
   final TextEditingController controller;
@@ -19,12 +20,12 @@ class _PasswordFieldState extends State<PasswordField> {
       controller: widget.controller,
       obscureText: _obscure,
       validator: (value) {
-        if (value == null || value.isEmpty) return 'Ingresa tu contraseña';
-        if (value.length < 6) return 'Mínimo 6 caracteres';
+        if (value == null || value.isEmpty) return AppStrings.enterPassword;
+        if (value.length < 6) return AppStrings.minChars;
         return null;
       },
       decoration: InputDecoration(
-        labelText: 'Contraseña',
+        labelText: AppStrings.passwordLabel,
         prefixIcon: const Icon(Icons.lock_outline, color: AppTheme.primaryColor),
         suffixIcon: IconButton(
           icon: Icon(

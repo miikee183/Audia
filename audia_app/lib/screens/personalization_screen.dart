@@ -36,7 +36,16 @@ class _PersonalizationScreenState extends State<PersonalizationScreen> {
   File? _fotoPerfil;
   String? _idioma;
 
-  final List<String> _sexoOptions = ['Hombre', 'Mujer', 'Otro'];
+  List<_GenderOption> get _sexoOptions => [
+    _GenderOption(AppStrings.male, 'Hombre'),
+    _GenderOption(AppStrings.female, 'Mujer'),
+    _GenderOption(AppStrings.other, 'Otro'),
+  ];
+
+  String? _sexoBackendValue() {
+    if (_sexo == null) return null;
+    return _sexoOptions.firstWhere((o) => o.display == _sexo).backendValue;
+  }
 
   static const Map<String, String> _idiomas = {
     'English': 'English',
@@ -129,7 +138,7 @@ class _PersonalizationScreenState extends State<PersonalizationScreen> {
       final result = await _api.post('/perfil/', {
         'cuenta_id': user.userId,
         'fecha_nacimiento': _fechaNacimiento.toIso8601String().split('T')[0],
-        'sexo': _sexo,
+        'sexo': _sexoBackendValue() ?? _sexo,
         'nombre_usuario': _nombreUsuario,
         'biografia': _biografia,
         'foto_perfil': fotoBase64,
@@ -145,7 +154,7 @@ class _PersonalizationScreenState extends State<PersonalizationScreen> {
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error: ${e.toString().replaceFirst('Exception: ', '')}')),
+        SnackBar(content: Text('${AppStrings.error}: ${e.toString().replaceFirst('Exception: ', '')}')),
       );
     } finally {
       if (mounted) setState(() => _isLoading = false);
@@ -406,7 +415,7 @@ class _DateStep extends StatelessWidget {
           ),
           const SizedBox(height: 16),
           Text(
-            'Toca para cambiar fecha',
+            AppStrings.tapToChange,
             style: TextStyle(color: Colors.white.withAlpha(100), fontSize: 14),
           ),
           const Spacer(flex: 2),
@@ -416,9 +425,15 @@ class _DateStep extends StatelessWidget {
   }
 }
 
+class _GenderOption {
+  final String display;
+  final String backendValue;
+  const _GenderOption(this.display, this.backendValue);
+}
+
 class _SexStep extends StatelessWidget {
   final String? value;
-  final List<String> options;
+  final List<_GenderOption> options;
   final ValueChanged<String?> onChanged;
 
   const _SexStep({required this.value, required this.options, required this.onChanged});
@@ -430,13 +445,13 @@ class _SexStep extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: options.map((option) {
-          final isSelected = value == option;
+          final isSelected = value == option.display;
           return Padding(
             padding: const EdgeInsets.only(bottom: 12),
             child: SizedBox(
               width: double.infinity,
               child: OutlinedButton(
-                onPressed: () => onChanged(option),
+                onPressed: () => onChanged(option.display),
                 style: OutlinedButton.styleFrom(
                   side: BorderSide(
                     color: isSelected ? const Color(0xFF6C63FF) : Colors.white.withAlpha(60),
@@ -447,7 +462,7 @@ class _SexStep extends StatelessWidget {
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                 ),
                 child: Text(
-                  option,
+                  option.display,
                   style: TextStyle(
                     fontSize: 18,
                     color: isSelected ? const Color(0xFF6C63FF) : Colors.white,

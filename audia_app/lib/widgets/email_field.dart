@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../theme/app_theme.dart';
+import '../l10n/app_strings.dart';
 
 class EmailField extends StatelessWidget {
   final TextEditingController controller;
@@ -12,14 +13,14 @@ class EmailField extends StatelessWidget {
       controller: controller,
       keyboardType: TextInputType.emailAddress,
       validator: (value) {
-        if (value == null || value.isEmpty) return 'Ingresa tu correo';
+        if (value == null || value.isEmpty) return AppStrings.enterEmail;
         final emailRegex = RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$');
-        if (!emailRegex.hasMatch(value)) return 'Correo inválido';
+        if (!emailRegex.hasMatch(value)) return AppStrings.invalidEmail;
         return null;
       },
-      decoration: const InputDecoration(
-        labelText: 'Correo electrónico',
-        prefixIcon: Icon(Icons.email_outlined, color: AppTheme.primaryColor),
+      decoration: InputDecoration(
+        labelText: AppStrings.emailLabel,
+        prefixIcon: const Icon(Icons.email_outlined, color: AppTheme.primaryColor),
       ),
     );
   }

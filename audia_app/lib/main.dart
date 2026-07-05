@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'theme/app_theme.dart';
 import 'app_router.dart';
+import 'l10n/app_strings.dart';
 import 'providers/auth_provider.dart';
 import 'providers/audio_provider.dart';
 import 'providers/locale_provider.dart';
@@ -58,7 +59,7 @@ class _AudiaAppState extends State<AudiaApp> {
     final themeMode = context.watch<ThemeProvider>().themeMode;
 
     return MaterialApp.router(
-      title: 'Audia',
+      title: AppStrings.appName,
       debugShowCheckedModeBanner: false,
       theme: AppTheme.darkTheme,
       darkTheme: AppTheme.darkTheme,

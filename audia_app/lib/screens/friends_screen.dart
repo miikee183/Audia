@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../theme/app_theme.dart';
 import '../l10n/app_strings.dart';
 
 class FriendsScreen extends StatelessWidget {
@@ -12,28 +11,22 @@ class FriendsScreen extends StatelessWidget {
         title: Text(AppStrings.friends, style: const TextStyle(fontWeight: FontWeight.bold)),
         centerTitle: true,
       ),
-      body: ListView(
-        padding: const EdgeInsets.all(16),
-        children: List.generate(
-          8,
-          (i) => Card(
-            color: AppTheme.cardColor,
-            margin: const EdgeInsets.only(bottom: 8),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-            child: ListTile(
-              leading: CircleAvatar(
-                backgroundColor: AppTheme.primaryColor.withAlpha(60),
-                child: const Icon(Icons.person, color: Colors.white70),
+      body: Center(
+        child: Padding(
+          padding: const EdgeInsets.all(32),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.people_outline, size: 64, color: Colors.white.withAlpha(40)),
+              const SizedBox(height: 16),
+              Text(
+                AppStrings.noData.replaceFirst('{label}', AppStrings.friends.toLowerCase()),
+                style: const TextStyle(color: Colors.white38, fontSize: 16),
               ),
-              title: Text(AppStrings.friendN.replaceFirst('{n}', '${i + 1}'), style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600)),
-              subtitle: Text(AppStrings.lastMessage, style: const TextStyle(color: Colors.white38, fontSize: 12)),
-              trailing: const Icon(Icons.chevron_right, color: Colors.white38),
-              onTap: () {},
-            ),
+            ],
           ),
         ),
       ),
     );
   }
 }
-

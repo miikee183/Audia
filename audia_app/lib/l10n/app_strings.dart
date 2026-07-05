@@ -1486,6 +1486,132 @@ class AppStrings {
     'ja': 'アカウントが確認されました。ログインしてください。',
   });
 
+  static String get loginCancelled => _t({
+    'en': 'Login cancelled',
+    'es': 'Inicio de sesión cancelado',
+    'fr': 'Connexion annulée',
+    'pt': 'Login cancelado',
+    'de': 'Anmeldung abgebrochen',
+    'it': 'Accesso annullato',
+    'ru': 'Вход отменён',
+    'ar': 'تم إلغاء تسجيل الدخول',
+    'zh': '登录已取消',
+    'ko': '로그인이 취소되었습니다',
+    'ja': 'ログインがキャンセルされました',
+  });
+
+  static String get googleTokenError => _t({
+    'en': 'Could not get Google token',
+    'es': 'No se pudo obtener el token de Google',
+    'fr': 'Impossible d\'obtenir le jeton Google',
+    'pt': 'Não foi possível obter o token do Google',
+    'de': 'Google-Token konnte nicht abgerufen werden',
+    'it': 'Impossibile ottenere il token Google',
+    'ru': 'Не удалось получить токен Google',
+    'ar': 'تعذر الحصول على رمز Google',
+    'zh': '无法获取 Google 令牌',
+    'ko': 'Google 토큰을 가져올 수 없습니다',
+    'ja': 'Googleトークンを取得できませんでした',
+  });
+
+  static String get audioPlayError => _t({
+    'en': 'Error playing audio',
+    'es': 'Error al reproducir audio',
+    'fr': 'Erreur de lecture audio',
+    'pt': 'Erro ao reproduzir áudio',
+    'de': 'Fehler bei der Audiowiedergabe',
+    'it': 'Errore durante la riproduzione audio',
+    'ru': 'Ошибка воспроизведения аудио',
+    'ar': 'خطأ في تشغيل الصوت',
+    'zh': '播放音频时出错',
+    'ko': '오디오 재생 오류',
+    'ja': 'オーディオ再生エラー',
+  });
+
+  static String get dayLabel => _t({
+    'en': 'Day',
+    'es': 'Día',
+    'fr': 'Jour',
+    'pt': 'Dia',
+    'de': 'Tag',
+    'it': 'Giorno',
+    'ru': 'День',
+    'ar': 'اليوم',
+    'zh': '日',
+    'ko': '일',
+    'ja': '日',
+  });
+
+  static String get monthLabel => _t({
+    'en': 'Month',
+    'es': 'Mes',
+    'fr': 'Mois',
+    'pt': 'Mês',
+    'de': 'Monat',
+    'it': 'Mese',
+    'ru': 'Месяц',
+    'ar': 'الشهر',
+    'zh': '月',
+    'ko': '월',
+    'ja': '月',
+  });
+
+  static String get yearLabel => _t({
+    'en': 'Year',
+    'es': 'Año',
+    'fr': 'Année',
+    'pt': 'Ano',
+    'de': 'Jahr',
+    'it': 'Anno',
+    'ru': 'Год',
+    'ar': 'السنة',
+    'zh': '年',
+    'ko': '년',
+    'ja': '年',
+  });
+
+  static String get notifications => _t({
+    'en': 'Notifications',
+    'es': 'Notificaciones',
+    'fr': 'Notifications',
+    'pt': 'Notificações',
+    'de': 'Benachrichtigungen',
+    'it': 'Notifiche',
+    'ru': 'Уведомления',
+    'ar': 'الإشعارات',
+    'zh': '通知',
+    'ko': '알림',
+    'ja': '通知',
+  });
+
+  static String get hour => _t({
+    'en': 'hour',
+    'es': 'hora',
+    'fr': 'heure',
+    'pt': 'hora',
+    'de': 'Stunde',
+    'it': 'ora',
+    'ru': 'час',
+    'ar': 'ساعة',
+    'zh': '小时',
+    'ko': '시간',
+    'ja': '時間',
+  });
+
+  static String get minute => _t({
+    'en': 'minute',
+    'es': 'minuto',
+    'fr': 'minute',
+    'pt': 'minuto',
+    'de': 'Minute',
+    'it': 'minuto',
+    'ru': 'минута',
+    'ar': 'دقيقة',
+    'zh': '分钟',
+    'ko': '분',
+    'ja': '分',
+  });
+
   // == RECORD ==
   static String get record => _t({
     'en': 'Record',

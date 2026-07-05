@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:http/http.dart' as http;
+import '../l10n/app_strings.dart';
 
 class ApiService {
   static const String _prodBaseUrl = 'https://audia-5cjt.onrender.com';
@@ -43,7 +44,7 @@ class ApiService {
       return decoded as Map<String, dynamic>;
     }
     final error = jsonDecode(response.body);
-    throw Exception(error['detail'] ?? 'Error del servidor');
+    throw Exception(error['detail'] ?? AppStrings.serverError);
   }
 
   Future<dynamic> get(String path) async {
@@ -57,7 +58,7 @@ class ApiService {
       return jsonDecode(response.body);
     }
     final error = jsonDecode(response.body);
-    throw Exception(error['detail'] ?? 'Error del servidor');
+    throw Exception(error['detail'] ?? AppStrings.serverError);
   }
 
   Future<Map<String, dynamic>> put(String path, Map<String, dynamic> body) async {
@@ -74,7 +75,7 @@ class ApiService {
       return decoded as Map<String, dynamic>;
     }
     final error = jsonDecode(response.body);
-    throw Exception(error['detail'] ?? 'Error del servidor');
+    throw Exception(error['detail'] ?? AppStrings.serverError);
   }
 
   void dispose() => _client.close();
